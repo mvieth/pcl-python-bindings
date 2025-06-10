@@ -21,6 +21,7 @@ NB_MODULE(pcl_io_ext, m)
 
   m.def("loadPCDFile", &pcl::io::loadPCDFile<pcl::PointXYZ>);
   m.def("loadPCDFile", &pcl::io::loadPCDFile<pcl::PointXYZRGBA>);
+  m.def("loadPCDFile", &pcl::io::loadPCDFile<pcl::PointNormal>);
   m.def("loadPLYFile", &pcl::io::loadPLYFile<pcl::PointXYZ>);
   m.def("loadPLYFile", &pcl::io::loadPLYFile<pcl::PointXYZRGBA>);
   m.def("savePCDFileBinary", &pcl::io::savePCDFileBinary<pcl::PointXYZ>);
