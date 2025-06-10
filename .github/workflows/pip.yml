@@ -32,7 +32,7 @@ jobs:
 
     - name: Build and install
       run: |
-        apt install libpcl-dev
+        sudo apt install libpcl-dev
         python -m pip install pytest
         pip install --verbose .
 
