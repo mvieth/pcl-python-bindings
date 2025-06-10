@@ -63,6 +63,9 @@ target_link_libraries(pcl_common_ext PRIVATE pcl_common)
 nanobind_add_module(pcl_io_ext src/python_io.cpp)
 target_link_libraries(pcl_io_ext PRIVATE pcl_io)
 
+nanobind_add_module(pcl_features_ext src/python_features.cpp)
+target_link_libraries(pcl_features_ext PRIVATE pcl_features)
+
 nanobind_add_module(pcl_filters_ext src/python_filters.cpp)
 target_link_libraries(pcl_filters_ext PRIVATE pcl_filters)
 
@@ -72,5 +75,6 @@ target_link_libraries(pcl_visualization_ext PRIVATE pcl_visualization)
 # Install directive for scikit-build-core
 install(TARGETS pcl_common_ext LIBRARY DESTINATION pcl/common)
 install(TARGETS pcl_io_ext LIBRARY DESTINATION pcl/io)
+install(TARGETS pcl_features_ext LIBRARY DESTINATION pcl/features)
 install(TARGETS pcl_filters_ext LIBRARY DESTINATION pcl/filters)
 install(TARGETS pcl_visualization_ext LIBRARY DESTINATION pcl/visualization)
