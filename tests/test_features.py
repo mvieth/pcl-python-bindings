@@ -1,12 +1,16 @@
 # for pytest
-from pcl.common import PointcloudXYZNormal
+from pcl.common import PointcloudXYZNormal, PointXYZNormal
 from pcl.features import NormalEstimationXYZNormal
 from pcl.io import loadPCDFile
 from math import isnan
 
 def test_normalestimation():
     cloud_normals = PointcloudXYZNormal()
-    loadPCDFile("/home/markus/pcd_files/table_scene_mug_stereo_textured.pcd", cloud_normals)
+    #loadPCDFile("/home/markus/pcd_files/table_scene_mug_stereo_textured.pcd", cloud_normals)
+    for x in range(15):
+        for y in range(15):
+            cloud_normals.append(PointXYZNormal(x, y, 0.0))
+    assert len(cloud_normals)>0
     ne = NormalEstimationXYZNormal()
     ne.setInputCloud(cloud_normals)
     ne.setKSearch(50)
