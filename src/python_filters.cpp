@@ -22,15 +22,13 @@ NB_MODULE(pcl_filters_ext, m)
       .def("setNegative", &pcl::FilterIndices<pcl::PointXYZ>::setNegative)
       ;
 #endif
-  nb::class_<pcl::PassThrough<pcl::PointXYZ>>(m, "PassThroughXYZ")
+  nb::class_<pcl::PassThrough<pcl::PointXYZ>>(m, "PassThroughXYZ", "PassThrough passes points in a cloud based on constraints for one particular field of the point type. Iterates through the entire input once, automatically filtering non-finite points and the points outside the interval specified by setFilterLimits(), which applies only to the field specified by setFilterFieldName().")
       .def(nb::init<>())
-      .def("setInputCloud", &pcl::PassThrough<pcl::PointXYZ>::setInputCloud)
-      .def("setFilterLimits", &pcl::PassThrough<pcl::PointXYZ>::setFilterLimits)
-      .def("setFilterFieldName", &pcl::PassThrough<pcl::PointXYZ>::setFilterFieldName)
-      .def("setNegative", &pcl::FilterIndices<pcl::PointXYZ>::setNegative)
-      .def("filter",
-           nb::overload_cast<pcl::PointCloud<pcl::PointXYZ>&>(
-               &pcl::Filter<pcl::PointXYZ>::filter))
+      .def("setInputCloud", &pcl::PassThrough<pcl::PointXYZ>::setInputCloud, nb::arg("cloud"), "Provide the input dataset.")
+      .def("setFilterLimits", &pcl::PassThrough<pcl::PointXYZ>::setFilterLimits, nb::arg("limit_min"), nb::arg("limit_max"), "Set the numerical limits for the field for filtering data. In conjunction with setFilterFieldName(), points having values outside this interval for this field will be discarded.")
+      .def("setFilterFieldName", &pcl::PassThrough<pcl::PointXYZ>::setFilterFieldName, nb::arg("field_name"), "Provide the name of the field to be used for filtering data. In conjunction with setFilterLimits(), points having values outside this interval for this field will be discarded.")
+      .def("setNegative", &pcl::FilterIndices<pcl::PointXYZ>::setNegative, nb::arg("negative"), "Set whether the regular conditions for points filtering should apply, or the inverted conditions.")
+      .def("filter", nb::overload_cast<pcl::PointCloud<pcl::PointXYZ>&>(&pcl::Filter<pcl::PointXYZ>::filter), nb::arg("output"), "Calls the filtering method and returns the filtered dataset in output.")
       ;
 
   nb::class_<pcl::PassThrough<pcl::PointXYZRGBA>>(m, "PassThroughXYZRGBA")

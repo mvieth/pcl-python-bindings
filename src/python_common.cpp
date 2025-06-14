@@ -46,7 +46,7 @@ NB_MODULE(pcl_common_ext, m)
   // TODO rename Pointcloud to PointCloud to match C++ name?
   nb::class_<pcl::PointCloud<pcl::PointXYZ>>(m, "PointcloudXYZ")
       .def(nb::init<>())
-      .def("append", &pcl::PointCloud<pcl::PointXYZ>::push_back)
+      .def("append", &pcl::PointCloud<pcl::PointXYZ>::push_back, nb::arg("point"), "Insert a new point in the cloud, at the end of the container.")
       .def("at", nb::overload_cast<std::size_t>(&pcl::PointCloud<pcl::PointXYZ>::at), "Get a point from the cloud")
       .def("__getitem__",
              [](pcl::PointCloud<pcl::PointXYZ> &cloud, std::size_t i) -> pcl::PointXYZ& {
