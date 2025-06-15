@@ -33,6 +33,6 @@ NB_MODULE(pcl_visualization_ext, m)
       .def("spinOnce", &pcl::visualization::PCLVisualizer::spinOnce,"runs the visualizer loop once")
       .def("addCoordinateSystem",
            nb::overload_cast<double, const std::string&, int>(&pcl::visualization::PCLVisualizer::addCoordinateSystem),
-           "Adds a coordinate system")
+           nb::arg("scale")=1.0, nb::arg("id")="reference", nb::arg("viewport")=0, "Adds a coordinate system")
     ;
 }
