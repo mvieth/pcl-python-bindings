@@ -30,7 +30,7 @@ NB_MODULE(pcl_visualization_ext, m)
                &pcl::visualization::PCLVisualizer::addPointCloud<pcl::PointXYZRGBA>),
            nb::arg("cloud"), nb::arg("id")="cloud", nb::arg("viewport")=0, "Add point cloud.")
       .def("removeAllShapes", &pcl::visualization::PCLVisualizer::removeAllShapes, nb::arg("viewport")=0, "Clear the visualizer.")
-      .def("spinOnce", &pcl::visualization::PCLVisualizer::spinOnce, nb::arg("time")=1, nb::arg("force_redraw")=false, "runs the visualizer loop once")
+      .def("spinOnce", &pcl::visualization::PCLVisualizer::spinOnce, nb::arg("time")=1, nb::arg("force_redraw")=false, "Runs the visualizer loop once")
       .def("addCoordinateSystem",
            nb::overload_cast<double, const std::string&, int>(&pcl::visualization::PCLVisualizer::addCoordinateSystem),
            nb::arg("scale")=1.0, nb::arg("id")="reference", nb::arg("viewport")=0, "Adds a coordinate system")

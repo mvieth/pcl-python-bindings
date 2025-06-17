@@ -1,8 +1,9 @@
 # for pytest
+import pytest
 from pcl.common import PointcloudXYZ, PointXYZ
 from pcl.registration import IterativeClosestPointXYZ
 
-def test_normalestimation():
+def test_iterativeclosestpoint():
     cloud_source = PointcloudXYZ()
     cloud_source.append(PointXYZ(0, 0, 0))
     cloud_source.append(PointXYZ(0, 10, 0))
@@ -19,4 +20,4 @@ def test_normalestimation():
     assert len(cloud_source_aligned)==3
     assert icp.hasConverged()
     transf = icp.getFinalTransformation()
-    assert transf[0, 3]==1.0
+    assert transf[0, 3] == pytest.approx(1.0)
