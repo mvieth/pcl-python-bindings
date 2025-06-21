@@ -25,6 +25,6 @@ NB_MODULE(pcl_segmentation_ext, m)
         clusters.reserve(clusters2.size());
         for(const auto& cluster: clusters2) { clusters.push_back(cluster.indices); }
         return clusters;
-      }, "Cluster extraction in a PointCloud.")
+      }, "Cluster extraction in a PointCloud. Returns a list of lists of indices, so for example clusters[0] is the first cluster, and clusters[0][0] is the index of the first point in the first cluster.")
       ;
 }
