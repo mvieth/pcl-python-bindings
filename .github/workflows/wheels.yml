@@ -44,19 +44,32 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-13, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-13]
+        #, windows-latest TODO later
+        #, macos-latest Necessary if we build macos-13?
 
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: true
 
-    - uses: astral-sh/setup-uv@v5
-
     - uses: pypa/cibuildwheel@v2.23
       env:
         CIBW_ENABLE: cpython-prerelease
+        # Skip pypy (pp) for now, also skip i686 and musllinux for now, they need additional dockerimages with PCL preinstalled
+        CIBW_SKIP: "pp*-macosx_x86_64 pp*-manylinux_* *-manylinux_i686 *-musllinux_*"
+        # alternatively xvfb to run visualization test?
+        CIBW_TEST_COMMAND_LINUX: pytest {project}/tests -k 'not test_basic_visualization_functionality'
+        # Some .so files are in these lib64 paths, which auditwheel does not seem to search automatically
+        CIBW_REPAIR_WHEEL_COMMAND_LINUX: "LD_LIBRARY_PATH=/usr/local/lib64/:/usr/lib64/ auditwheel repair -w {dest_dir} {wheel}"
+        # Maybe useful later?
+        #CIBW_BEFORE_BUILD_WINDOWS: "pip install delvewheel"
+        #CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair -w {dest_dir} {wheel}"
         CIBW_ARCHS_WINDOWS: auto ARM64
+        CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="13.0"
+        CIBW_BEFORE_ALL_MACOS: brew install pcl
+        CIBW_MANYLINUX_X86_64_IMAGE: markusvieth/pcl-manylinux_2_28:x86_64_latest
+        # Add images for i686 and musllinux later?
 
     - name: Verify clean directory
       run: git diff --exit-code
