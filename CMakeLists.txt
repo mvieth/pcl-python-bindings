@@ -35,6 +35,8 @@ find_package(Python 3.8
 # Import nanobind through CMake's find_package mechanism
 find_package(nanobind CONFIG REQUIRED)
 
+add_compile_options(-fconcepts)
+
 # We are now ready to compile the actual extension module
 #nanobind_add_module(
   # Name of the extension
