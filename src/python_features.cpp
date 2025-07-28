@@ -28,9 +28,9 @@ class NormalEstimation{
     NormalEstimation(int k_search, double radius_search): k_search(k_search), radius_search(radius_search) {}
 };
 
-template<typename T>
-pcl::NormalEstimation<T, T> create_estimator(T&){
-  return pcl::NormalEstimation<T, T>();
+template<typename PointT>
+pcl::NormalEstimation<PointT, PointT> create_estimator(PointT&){
+  return pcl::NormalEstimation<PointT, PointT>();
 };
 
 template<typename T> requires (!HasPosition<T>)
