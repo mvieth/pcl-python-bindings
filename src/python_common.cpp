@@ -19,12 +19,12 @@ void set_positions(T &cloud, InputArray2d array)  {std::cout << "Key does not ex
 template<typename T> requires HasPosition<T>
 void set_positions(T &cloud, InputArray2d array)
 {
-  cloud.resize(array.shape(0));
+  cloud->resize(array.shape(0));
 
   for (int ii = 0; ii < array.shape(0); ii++){
-    cloud[ii].x = array(ii, 0);
-    cloud[ii].y = array(ii, 1);
-    cloud[ii].z = array(ii, 2);
+    (*cloud)[ii].x = array(ii, 0);
+    (*cloud)[ii].y = array(ii, 1);
+    (*cloud)[ii].z = array(ii, 2);
   }
 };
 
@@ -33,11 +33,11 @@ NumpyArray2d get_positions(T &cloud) {std::cout << "Key does not exist.\n"; thro
 template<typename T> requires HasPosition<T>
 NumpyArray2d get_positions(T &cloud){
   char cols = 3;
-  auto rows = cloud.size(); 
+  auto rows = cloud->size(); 
 
   float *data = new float[rows * cols];
   for (size_t i = 0; i < rows; ++i){
-    auto value = cloud[i];
+    auto value = (*cloud)[i];
     data[i * cols]  = value.x;
     data[i * cols + 1]  = value.y;
     data[i * cols + 2]  = value.z;
@@ -53,12 +53,12 @@ void set_normals(T &cloud, const InputArray2d& array)  {std::cout << "Key does n
 template<typename T> requires HasNormal<T>
 void set_normals(T &cloud, const InputArray2d& array)
 {
-  cloud.resize(array.shape(0));
+  cloud->resize(array.shape(0));
 
   for (int ii = 0; ii < array.shape(0); ii++){
-    cloud[ii].normal_x = array(ii, 0);
-    cloud[ii].normal_y = array(ii, 1);
-    cloud[ii].normal_z = array(ii, 2);
+    (*cloud)[ii].normal_x = array(ii, 0);
+    (*cloud)[ii].normal_y = array(ii, 1);
+    (*cloud)[ii].normal_z = array(ii, 2);
   }
 };
 
@@ -67,11 +67,11 @@ NumpyArray2d get_normals(T &cloud) {std::cout << "Key does not exist.\n"; throw 
 template<typename T> requires HasNormal<T>
 NumpyArray2d get_normals(T &cloud){
   char cols = 3;
-  auto rows = cloud.size(); 
+  auto rows = cloud->size(); 
 
   float *data = new float[rows * cols];
   for (size_t i = 0; i < rows; ++i){
-    auto value = cloud[i];
+    auto value = (*cloud)[i];
     data[i * cols]  = value.normal_x;
     data[i * cols + 1]  = value.normal_y;
     data[i * cols + 2]  = value.normal_z;

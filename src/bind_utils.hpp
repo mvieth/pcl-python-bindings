@@ -1,4 +1,5 @@
 #include <concepts>
+#include <memory>
 #include <string>
 #include <variant>
 
@@ -14,10 +15,10 @@ using NumpyArray2d = nb::ndarray<float, nb::numpy, nb::ndim<2>>;
 using InputArray2d = nb::ndarray<float, nb::ndim<2>>;
 
 using CloudVariant = std::variant<
-  pcl::PointCloud<pcl::PointXYZ>,
-  pcl::PointCloud<pcl::PointXYZRGBA>,
-  pcl::PointCloud<pcl::PointNormal>,
-  pcl::PointCloud<pcl::Normal>
+  std::shared_ptr<pcl::PointCloud<pcl::PointXYZ>>,
+  std::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA>>,
+  std::shared_ptr<pcl::PointCloud<pcl::PointNormal>>,
+  std::shared_ptr<pcl::PointCloud<pcl::Normal>>
 >;
 
 template<typename T>
@@ -37,38 +38,38 @@ enum PointType{
 
 template<typename T>
 concept HasPosition = requires (T cloud){
-  cloud.front().x;
-  cloud.front().y;
-  cloud.front().z;
+  cloud->front().x;
+  cloud->front().y;
+  cloud->front().z;
 };
 
 template<typename T>
 concept HasNormal= requires (T cloud){
-  cloud.front().normal_x;
-  cloud.front().normal_y;
-  cloud.front().normal_z;
+  cloud->front().normal_x;
+  cloud->front().normal_y;
+  cloud->front().normal_z;
 };
 
 
 class PointCloud
 {
   public:
-    CloudVariant data;
+     CloudVariant data;
 
   PointCloud(CloudVariant data_): data(data_) {}
 
   PointCloud(PointType type) {
     switch(type) {
       case PointXYZ: {
-        data = pcl::PointCloud<pcl::PointXYZ>();
+        data = std::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
         break;
       }
       case PointNormal: {
-        data = pcl::PointCloud<pcl::PointNormal>();
+        data = std::make_shared<pcl::PointCloud<pcl::PointNormal>>();
         break;
       }
       case Normal: {
-        data = pcl::PointCloud<pcl::Normal>();
+        data = std::make_shared<pcl::PointCloud<pcl::Normal>>();
         break;
       }
       default:
@@ -77,7 +78,7 @@ class PointCloud
     }
   }
 
-  size_t size() const {return std::visit([](auto&& arg){ return arg.size();}, data);}
+  size_t size() const {return std::visit([](auto&& arg){ return arg->size();}, data);}
   PointType type() const {return static_cast<PointType>(data.index());}
 };
 
