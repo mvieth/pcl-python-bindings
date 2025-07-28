@@ -14,11 +14,6 @@
 namespace nb = nanobind;
 using namespace nb::literals;
 
-template<typename T>
-std::shared_ptr<T> create_shared_ptr(T& value){
-  std::shared_ptr<T> pointer(&value);
-  return pointer;
-};
 
 class NormalEstimation{
   public:

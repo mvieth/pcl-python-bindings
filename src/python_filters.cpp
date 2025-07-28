@@ -38,10 +38,6 @@ class PassThrough{
         negative(negative) {}
 };
 
-template<typename T>
-pcl::shared_ptr<T> make_shared_of_type(T&){
-  return std::make_shared<T>();
-};
 
 // Without the position-restriction there is errors during the python import
 template<typename T> requires (!HasPosition<T>)

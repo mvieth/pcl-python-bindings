@@ -14,6 +14,12 @@ namespace nb = nanobind;
 using NumpyArray2d = nb::ndarray<float, nb::numpy, nb::ndim<2>>;
 using InputArray2d = nb::ndarray<float, nb::ndim<2>>;
 
+template<typename T>
+pcl::shared_ptr<T> make_shared_of_type(const T&){
+  return std::make_shared<T>();
+};
+
+
 using CloudVariant = std::variant<
   std::shared_ptr<pcl::PointCloud<pcl::PointXYZ>>,
   std::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA>>,
