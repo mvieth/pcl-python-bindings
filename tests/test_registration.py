@@ -1,7 +1,10 @@
-# for pytest
-import pytest
-from pcl.common import PointcloudXYZ, PointXYZ
-from pcl.registration import IterativeClosestPointXYZ
+from pcl.common import PointcloudXYZ, PointXYZ, PointCloud
+from pcl.registration import IterativeClosestPointXYZ, IterativeClosestPoint
+
+from pcl.common import PointType as t
+
+import numpy as np
+
 
 def test_iterativeclosestpoint():
     cloud_source = PointcloudXYZ()
@@ -17,7 +20,35 @@ def test_iterativeclosestpoint():
     icp.setInputTarget(cloud_target)
     cloud_source_aligned = PointcloudXYZ()
     icp.align(cloud_source_aligned)
-    assert len(cloud_source_aligned)==3
+    assert len(cloud_source_aligned) == 3
     assert icp.hasConverged()
     transf = icp.getFinalTransformation()
+
+    import pytest
+
     assert transf[0, 3] == pytest.approx(1.0)
+
+
+def test_icp_general_cloud():
+    source = PointCloud(t.PointXYZ)
+    source["position"] = np.array([[0, 0, 0], [0, 10, 0], [0, 0, 10]])
+
+    target = PointCloud(t.PointXYZ)
+    target["position"] = np.array([[1, 0, 0], [1, 10, 0], [1, 0, 10]])
+
+    icp = IterativeClosestPoint(
+        inlier_threshold=0.05, max_iterations=10, ransac_iterations=0
+    )
+
+    icp.align(source=source, target=target)
+    breakpoint()
+
+    assert icp.converged_
+
+    expected_ = np.eye(4)
+    expected_[0, 3] = 1.0
+    np.testing.assert_allclose(icp.final_transformation_, expected_, atol=1e-6)
+
+
+if __name__ == "__main__":
+    test_icp_general_cloud()

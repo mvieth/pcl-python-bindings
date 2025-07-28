@@ -79,6 +79,12 @@ target_link_libraries(pcl_filters_ext PUBLIC ${PCL_LIBRARIES})
 set_target_properties(pcl_filters_ext PROPERTIES INSTALL_RPATH /usr/local/lib)
 set_target_properties(pcl_filters_ext PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+nanobind_add_module(pcl_registration_ext STABLE_ABI NB_STATIC src/python_registration.cpp)
+target_link_libraries(pcl_registration_ext PUBLIC ${PCL_LIBRARIES})
+set_target_properties(pcl_registration_ext PROPERTIES INSTALL_RPATH /usr/local/lib)
+set_target_properties(pcl_registration_ext PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+
 # nanobind_add_module(pcl_registration_ext src/python_registration.cpp)
 # target_link_libraries(pcl_registration_ext PRIVATE pcl_registration)
 
@@ -93,6 +99,6 @@ install(TARGETS pcl_common_ext LIBRARY DESTINATION pcl/common)
 install(TARGETS pcl_io_ext LIBRARY DESTINATION pcl/io)
 install(TARGETS pcl_features_ext LIBRARY DESTINATION pcl/features)
 install(TARGETS pcl_filters_ext LIBRARY DESTINATION pcl/filters)
-# install(TARGETS pcl_registration_ext LIBRARY DESTINATION pcl/registration)
+install(TARGETS pcl_registration_ext LIBRARY DESTINATION pcl/registration)
 # install(TARGETS pcl_segmentation_ext LIBRARY DESTINATION pcl/segmentation)
 # install(TARGETS pcl_visualization_ext LIBRARY DESTINATION pcl/visualization)
