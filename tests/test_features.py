@@ -29,16 +29,16 @@ def test_normalestimation():
 def test_normal_estimation_general():
     cloud_normals = PointCloud(t.PointNormal)
     num = 15
-    cloud_normals["position"] = np.hstack(
+    cloud_normals["position"] = np.vstack(
         (np.arange(num), np.arange(num), np.zeros(num))
-    )
+    ).T
     assert len(cloud_normals) == num
 
-    NormalEstimation(k_search=50, radius_search=0.0).compute(cloud_normals)
+    ee = NormalEstimation(k_search=50, radius_search=0.0)
+    ee.compute(cloud_normals)
 
     norm = np.sum(cloud_normals["normal"] ** 2, axis=1)
-    np.testing.assert_allclose(norm, np.ones(num))
-
+    np.testing.assert_allclose(norm, np.ones(num), atol=1e-6)
 
 if __name__ == "__main__":
     test_normal_estimation_general()

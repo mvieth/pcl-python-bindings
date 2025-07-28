@@ -1,3 +1,4 @@
+#include <memory>
 #include <variant>
 
 #include <nanobind/nanobind.h>
@@ -38,13 +39,11 @@ template<typename T> requires (!HasNormal<T>)
 void compute_inplace(T& cloud, NormalEstimation&) {std::cout << "Does not have normal.\n"; throw 101;};
 template<typename T> requires (HasPosition<T> && HasNormal<T>)
 void compute_inplace(T& cloud, const NormalEstimation& parameters){
-  // Pass point cloud to infer reference type
-  auto estimator = create_estimator(cloud.front());
+  auto estimator = create_estimator(cloud->front());
   estimator.setKSearch(parameters.k_search);
   estimator.setRadiusSearch(parameters.radius_search);
-  auto cloud_ptr = create_shared_ptr(cloud);
-  estimator.setInputCloud(cloud_ptr);
-  estimator.compute(cloud);
+  estimator.setInputCloud(cloud);
+  estimator.compute(*cloud);
 };
 
 NB_MODULE(pcl_features_ext, m)
