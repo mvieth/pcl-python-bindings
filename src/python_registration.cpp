@@ -48,7 +48,6 @@ create_icp(PointT&, PointS){
 template<typename CloudT, typename CloudS> requires (!HasPosition<CloudT> || !HasPosition<CloudS>)
 void align(CloudT& source,  CloudS& target, IterativeClosestPoint& parameters){
 std::cout << "Does not have position.\n"; throw 101;};
-
 template<typename CloudT, typename CloudS> requires (HasPosition<CloudT> && HasPosition<CloudS>)
 void align(CloudT& source,  CloudS& target, IterativeClosestPoint& parameters){
   auto icp = create_icp(source->front(), target->front());
@@ -83,9 +82,9 @@ NB_MODULE(pcl_registration_ext, m)
     "Return the state of convergence after the last align run.")
   .def_ro("final_transformation_", &IterativeClosestPoint::final_transformation_, 
     "Get the final transformation matrix estimated by the registration method.")
-  .def("align", [](IterativeClosestPoint& estimation, PointCloud& source, PointCloud& target){
-    std::visit([&estimation](auto& source_, auto& target_){
-      align(source_, target_, estimation);
+  .def("align", [](IterativeClosestPoint& icp, PointCloud& source, PointCloud& target){
+    std::visit([&icp](auto& source_, auto& target_){
+      align(source_, target_, icp);
     }, source.data, target.data);
   }, "source"_a, "target"_a,
   "Call the registration algorithm which estimates the transformation and returns the transformed source (input) as output.") 
