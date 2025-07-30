@@ -89,9 +89,10 @@ target_link_libraries(pcl_segmentation_ext PUBLIC ${PCL_LIBRARIES})
 set_target_properties(pcl_segmentation_ext PROPERTIES INSTALL_RPATH /usr/local/lib)
 set_target_properties(pcl_segmentation_ext PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-nanobind_add_module(pcl_visualization_ext src/python_visualization.cpp)
-target_link_libraries(pcl_visualization_ext PRIVATE pcl_visualization)
-
+nanobind_add_module(pcl_visualization_ext STABLE_ABI NB_STATIC src/python_visualization.cpp)
+target_link_libraries(pcl_visualization_ext PUBLIC ${PCL_LIBRARIES})
+set_target_properties(pcl_visualization_ext PROPERTIES INSTALL_RPATH /usr/local/lib)
+set_target_properties(pcl_visualization_ext PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Install directive for scikit-build-core
 install(TARGETS pcl_common_ext LIBRARY DESTINATION pcl/common)
@@ -99,6 +100,5 @@ install(TARGETS pcl_features_ext LIBRARY DESTINATION pcl/features)
 install(TARGETS pcl_filters_ext LIBRARY DESTINATION pcl/filters)
 install(TARGETS pcl_registration_ext LIBRARY DESTINATION pcl/registration)
 install(TARGETS pcl_segmentation_ext LIBRARY DESTINATION pcl/segmentation)
-
-# install(TARGETS pcl_io_ext LIBRARY DESTINATION pcl/io)
-# install(TARGETS pcl_visualization_ext LIBRARY DESTINATION pcl/visualization)
+install(TARGETS pcl_io_ext LIBRARY DESTINATION pcl/io)
+install(TARGETS pcl_visualization_ext LIBRARY DESTINATION pcl/visualization)
