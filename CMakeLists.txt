@@ -35,6 +35,8 @@ find_package(Python 3.8
 # Import nanobind through CMake's find_package mechanism
 find_package(nanobind CONFIG REQUIRED)
 
+add_compile_options(-fconcepts)
+
 # We are now ready to compile the actual extension module
 #nanobind_add_module(
   # Name of the extension
@@ -57,32 +59,46 @@ find_package(nanobind CONFIG REQUIRED)
 #  src/nanobind_example_ext.cpp
 #)
 
-nanobind_add_module(pcl_common_ext src/python_common.cpp)
-target_link_libraries(pcl_common_ext PRIVATE pcl_common)
+# Setup for linux, see information on
+# https://github.com/pybind/cmake_example/issues/11#issuecomment-405092832
+nanobind_add_module(pcl_common_ext STABLE_ABI NB_STATIC src/python_common.cpp)
+target_link_libraries(pcl_common_ext PUBLIC ${PCL_LIBRARIES})
+set_target_properties(pcl_common_ext PROPERTIES INSTALL_RPATH /usr/local/lib)
+set_target_properties(pcl_common_ext PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+nanobind_add_module(pcl_features_ext STABLE_ABI NB_STATIC src/python_features.cpp)
+target_link_libraries(pcl_features_ext PUBLIC ${PCL_LIBRARIES})
+set_target_properties(pcl_features_ext PROPERTIES INSTALL_RPATH /usr/local/lib)
+set_target_properties(pcl_features_ext PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 nanobind_add_module(pcl_io_ext src/python_io.cpp)
 target_link_libraries(pcl_io_ext PRIVATE pcl_io)
 
-nanobind_add_module(pcl_features_ext src/python_features.cpp)
-target_link_libraries(pcl_features_ext PRIVATE pcl_features)
+nanobind_add_module(pcl_filters_ext STABLE_ABI NB_STATIC src/python_filters.cpp)
+target_link_libraries(pcl_filters_ext PUBLIC ${PCL_LIBRARIES})
+set_target_properties(pcl_filters_ext PROPERTIES INSTALL_RPATH /usr/local/lib)
+set_target_properties(pcl_filters_ext PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-nanobind_add_module(pcl_filters_ext src/python_filters.cpp)
-target_link_libraries(pcl_filters_ext PRIVATE pcl_filters)
+nanobind_add_module(pcl_registration_ext STABLE_ABI NB_STATIC src/python_registration.cpp)
+target_link_libraries(pcl_registration_ext PUBLIC ${PCL_LIBRARIES})
+set_target_properties(pcl_registration_ext PROPERTIES INSTALL_RPATH /usr/local/lib)
+set_target_properties(pcl_registration_ext PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-nanobind_add_module(pcl_registration_ext src/python_registration.cpp)
-target_link_libraries(pcl_registration_ext PRIVATE pcl_registration)
+nanobind_add_module(pcl_segmentation_ext STABLE_ABI NB_STATIC src/python_segmentation.cpp)
+target_link_libraries(pcl_segmentation_ext PUBLIC ${PCL_LIBRARIES})
+set_target_properties(pcl_segmentation_ext PROPERTIES INSTALL_RPATH /usr/local/lib)
+set_target_properties(pcl_segmentation_ext PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-nanobind_add_module(pcl_segmentation_ext src/python_segmentation.cpp)
-target_link_libraries(pcl_segmentation_ext PRIVATE pcl_segmentation)
-
-nanobind_add_module(pcl_visualization_ext src/python_visualization.cpp)
-target_link_libraries(pcl_visualization_ext PRIVATE pcl_visualization)
+nanobind_add_module(pcl_visualization_ext STABLE_ABI NB_STATIC src/python_visualization.cpp)
+target_link_libraries(pcl_visualization_ext PUBLIC ${PCL_LIBRARIES})
+set_target_properties(pcl_visualization_ext PROPERTIES INSTALL_RPATH /usr/local/lib)
+set_target_properties(pcl_visualization_ext PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Install directive for scikit-build-core
 install(TARGETS pcl_common_ext LIBRARY DESTINATION pcl/common)
-install(TARGETS pcl_io_ext LIBRARY DESTINATION pcl/io)
 install(TARGETS pcl_features_ext LIBRARY DESTINATION pcl/features)
 install(TARGETS pcl_filters_ext LIBRARY DESTINATION pcl/filters)
 install(TARGETS pcl_registration_ext LIBRARY DESTINATION pcl/registration)
 install(TARGETS pcl_segmentation_ext LIBRARY DESTINATION pcl/segmentation)
+install(TARGETS pcl_io_ext LIBRARY DESTINATION pcl/io)
 install(TARGETS pcl_visualization_ext LIBRARY DESTINATION pcl/visualization)
