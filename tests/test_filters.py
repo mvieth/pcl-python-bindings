@@ -42,6 +42,3 @@ def test_filters():
 
     np.testing.assert_allclose(result["position"], numpy_filtered)
 
-
-if __name__ == "__main__":
-    test_filters()

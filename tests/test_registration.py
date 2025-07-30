@@ -1,3 +1,4 @@
+import pytest
 from pcl.common import PointcloudXYZ, PointXYZ, PointCloud
 from pcl.registration import IterativeClosestPointXYZ, IterativeClosestPoint
 
@@ -24,7 +25,6 @@ def test_iterativeclosestpoint():
     assert icp.hasConverged()
     transf = icp.getFinalTransformation()
 
-    import pytest
 
     assert transf[0, 3] == pytest.approx(1.0)
 
@@ -49,6 +49,3 @@ def test_icp_general_cloud():
     expected_[0, 3] = 1.0
     np.testing.assert_allclose(icp.final_transformation_, expected_, atol=1e-6)
 
-
-if __name__ == "__main__":
-    test_icp_general_cloud()

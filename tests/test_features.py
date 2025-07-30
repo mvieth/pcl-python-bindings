@@ -40,5 +40,3 @@ def test_normal_estimation_general():
     norm = np.sum(cloud_normals["normal"] ** 2, axis=1)
     np.testing.assert_allclose(norm, np.ones(num), atol=1e-6)
 
-if __name__ == "__main__":
-    test_normal_estimation_general()

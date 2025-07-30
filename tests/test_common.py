@@ -55,44 +55,50 @@ def everything_is_cloud(n_points: int):
 
 def compare_speed():
     """
-    results:
+    >> compare_speed()
+
     Run with 1 point
-    Point-Based took 0.0 ms
-    Cloud-Based took 0.2 ms
+    Point-Based took 0.002 ms
+    Cloud-Based took 0.012 ms
     Run with 10 point
-    Point-Based took 0.0 ms
-    Cloud-Based took 0.1 ms
+    Point-Based took 0.005 ms
+    Cloud-Based took 0.011 ms
     Run with 100 point
-    Point-Based took 0.1 ms
-    Cloud-Based took 0.0 ms
+    Point-Based took 0.028 ms
+    Cloud-Based took 0.010 ms
     Run with 1000 point
-    Point-Based took 0.8 ms
-    Cloud-Based took 0.1 ms
+    Point-Based took 0.275 ms
+    Cloud-Based took 0.034 ms
     Run with 10000 point
-    Point-Based took 5.9 ms
-    Cloud-Based took 0.5 ms
+    Point-Based took 2.011 ms
+    Cloud-Based took 0.158 ms
     Run with 100000 point
-    Point-Based took 24.6 ms
-    Cloud-Based took 2.9 ms
+    Point-Based took 20.600 ms
+    Cloud-Based took 1.457 ms
     Run with 1000000 point
-    Point-Based took 194.7 ms
-    Cloud-Based took 15.4 ms
+    Point-Based took 192.949 ms
+    Cloud-Based took 14.528 ms
     """
+    n_rep = 20
     for power in np.arange(7): 
         n_points = int(10**power)
         print(f"Run with {n_points} point")
-        start = perf_counter()
-        everything_is_point(n_points)
-        stop = perf_counter()
-        print(f"Point-Based took {(stop - start) * 1000:0.1f} ms")
+        point_time = 0
+        cloud_time = 0
+        for ii in range(n_rep):
+            start = perf_counter()
+            everything_is_point(n_points)
+            stop = perf_counter()
+            point_time += (stop - start) / n_rep
 
-        start = perf_counter()
-        everything_is_cloud(n_points)
-        stop = perf_counter()
-        print(f"Cloud-Based took {(stop - start) * 1000:0.1f} ms")
+            start = perf_counter()
+            everything_is_cloud(n_points)
+            stop = perf_counter()
+            cloud_time += (stop - start) / n_rep
 
+        print(f"Point-Based took {point_time * 1000:0.3f} ms")
+        print(f"Cloud-Based took {cloud_time * 1000:0.3f} ms")
 
 
 if __name__ == "__main__":
-    # test_general_cloud()
     compare_speed()

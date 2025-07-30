@@ -42,5 +42,3 @@ def test_cluster_general():
     assert {2, 3, 4} in label_sets 
     assert {0, 1} in label_sets
 
-if __name__ == "__main__":
-    test_cluster_general()
