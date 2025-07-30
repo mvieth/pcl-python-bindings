@@ -25,7 +25,6 @@ def test_iterativeclosestpoint():
     assert icp.hasConverged()
     transf = icp.getFinalTransformation()
 
-
     assert transf[0, 3] == pytest.approx(1.0)
 
 
@@ -41,8 +40,6 @@ def test_icp_general_cloud():
     )
 
     icp.align(source=source, target=target)
-    breakpoint()
-
     assert icp.converged_
 
     expected_ = np.eye(4)
