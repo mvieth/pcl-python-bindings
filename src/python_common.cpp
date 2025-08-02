@@ -30,7 +30,7 @@ namespace nb = nanobind;
       .def_rw("b", &pcl::PointType::b) \
       .def_rw("a", &pcl::PointType::a)
 
-// Macro to add RGB field (single uint32_t)
+// Macro to add RGB field (packed as float)
 #define ADD_RGB_FIELDS(PointType) \
       .def_rw("rgb", &pcl::PointType::rgb)
 
@@ -52,279 +52,6 @@ namespace nb = nanobind;
 #define ADD_CURVATURE_FIELDS(PointType) \
       .def_rw("curvature", &pcl::PointType::curvature)
 
-// Macro to add range field
-#define ADD_RANGE_FIELDS(PointType) \
-      .def_rw("range", &pcl::PointType::range)
-
-// Macro to add __repr__ for XYZ-only points
-#define ADD_XYZ_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={})").format(p.x, p.y, p.z); \
-      })
-
-// Macro to add __repr__ for RGBA points
-#define ADD_RGBA_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, r={}, g={}, b={}, a={})").format(p.x, p.y, p.z, p.r, p.g, p.b, p.a); \
-      })
-
-// Macro to add __repr__ for Normal points
-#define ADD_NORMAL_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, nx={}, ny={}, nz={})").format(p.x, p.y, p.z, p.normal_x, p.normal_y, p.normal_z); \
-      })
-
-// Macro to add __repr__ for RGBA + Normal points
-#define ADD_RGBA_NORMAL_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, r={}, g={}, b={}, a={}, nx={}, ny={}, nz={})").format(p.x, p.y, p.z, p.r, p.g, p.b, p.a, p.normal_x, p.normal_y, p.normal_z); \
-      })
-
-// Macro to add __repr__ for Intensity points
-#define ADD_INTENSITY_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, intensity={})").format(p.x, p.y, p.z, p.intensity); \
-      })
-
-// Macro to add __repr__ for RGB points (no alpha)
-#define ADD_RGB_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, rgb={})").format(p.x, p.y, p.z, p.rgb); \
-      })
-
-// Macro to add __repr__ for Label points
-#define ADD_LABEL_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, label={})").format(p.x, p.y, p.z, p.label); \
-      })
-
-// Macro to add __repr__ for points with curvature (Normal)
-#define ADD_NORMAL_CURVATURE_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, nx={}, ny={}, nz={}, curvature={})").format(p.x, p.y, p.z, p.normal_x, p.normal_y, p.normal_z, p.curvature); \
-      })
-
-// Macro to add __repr__ for RGB + Normal + curvature points
-#define ADD_RGB_NORMAL_CURVATURE_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, rgb={}, nx={}, ny={}, nz={}, curvature={})").format(p.x, p.y, p.z, p.rgb, p.normal_x, p.normal_y, p.normal_z, p.curvature); \
-      })
-
-// Macro to add __repr__ for Range points
-#define ADD_RANGE_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, range={})").format(p.x, p.y, p.z, p.range); \
-      })
-
-// Macro to add __repr__ for RGB + Label points
-#define ADD_RGB_LABEL_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, rgb={}, label={})").format(p.x, p.y, p.z, p.rgb, p.label); \
-      })
-
-// Macro to add __repr__ for Intensity + Normal points
-#define ADD_INTENSITY_NORMAL_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, intensity={}, nx={}, ny={}, nz={}, curvature={})").format(p.x, p.y, p.z, p.intensity, p.normal_x, p.normal_y, p.normal_z, p.curvature); \
-      })
-
-// Macro to add __repr__ for Label + Normal points
-#define ADD_LABEL_NORMAL_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, label={}, nx={}, ny={}, nz={}, curvature={})").format(p.x, p.y, p.z, p.label, p.normal_x, p.normal_y, p.normal_z, p.curvature); \
-      })
-
-// Macro to add __repr__ for LAB points
-#define ADD_LAB_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, L={}, a={}, b={})").format(p.x, p.y, p.z, p.L, p.a, p.b); \
-      })
-
-// Macro to add __repr__ for HSV points
-#define ADD_HSV_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, h={}, s={}, v={})").format(p.x, p.y, p.z, p.h, p.s, p.v); \
-      })
-
-// Macro to add __repr__ for 2D XY points
-#define ADD_XY_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={})").format(p.x, p.y); \
-      })
-
-// Macro to add __repr__ for UV points
-#define ADD_UV_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(u={}, v={})").format(p.u, p.v); \
-      })
-
-// Macro to add __repr__ for Strength points
-#define ADD_STRENGTH_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, strength={})").format(p.x, p.y, p.z, p.strength); \
-      })
-
-// Macro to add __repr__ for Viewpoint points
-#define ADD_VIEWPOINT_REPR(PointType, PythonName) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(x={}, y={}, z={}, vp_x={}, vp_y={}, vp_z={})").format(p.x, p.y, p.z, p.vp_x, p.vp_y, p.vp_z); \
-      })
-
-// Composed macros for complete point type bindings
-#define BIND_POINT_XYZ(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_XYZ_REPR(PointType, PythonName)
-
-#define BIND_POINT_RGBA(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_RGBA_FIELDS(PointType) \
-  ADD_RGBA_REPR(PointType, PythonName)
-
-#define BIND_POINT_RGB(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_RGB_FIELDS(PointType) \
-  ADD_RGB_REPR(PointType, PythonName)
-
-#define BIND_POINT_INTENSITY(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_INTENSITY_FIELDS(PointType) \
-  ADD_INTENSITY_REPR(PointType, PythonName)
-
-#define BIND_POINT_LABEL(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_LABEL_FIELDS(PointType) \
-  ADD_LABEL_REPR(PointType, PythonName)
-
-#define BIND_POINT_NORMAL(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_NORMAL_FIELDS(PointType) \
-  ADD_CURVATURE_FIELDS(PointType) \
-  ADD_NORMAL_CURVATURE_REPR(PointType, PythonName)
-
-// Special macro for Normal-only points (no XYZ)
-#define BIND_NORMAL_ONLY(PointType, PythonName) \
-  nb::class_<pcl::PointType>(m, PythonName) \
-      .def(nb::init()) \
-      ADD_NORMAL_FIELDS(PointType) \
-      ADD_CURVATURE_FIELDS(PointType) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(nx={}, ny={}, nz={}, curvature={})").format(p.normal_x, p.normal_y, p.normal_z, p.curvature); \
-      })
-
-#define BIND_POINT_RGB_NORMAL(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_RGB_FIELDS(PointType) \
-  ADD_NORMAL_FIELDS(PointType) \
-  ADD_CURVATURE_FIELDS(PointType) \
-  ADD_RGB_NORMAL_CURVATURE_REPR(PointType, PythonName)
-
-#define BIND_POINT_RGBA_NORMAL(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_RGBA_FIELDS(PointType) \
-  ADD_NORMAL_FIELDS(PointType) \
-  ADD_RGBA_NORMAL_REPR(PointType, PythonName)
-
-#define BIND_POINT_RANGE(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_RANGE_FIELDS(PointType) \
-  ADD_RANGE_REPR(PointType, PythonName)
-
-// Additional bindings for complex point types
-#define BIND_POINT_RGB_LABEL(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_RGB_FIELDS(PointType) \
-  ADD_LABEL_FIELDS(PointType) \
-  ADD_RGB_LABEL_REPR(PointType, PythonName)
-
-#define BIND_POINT_INTENSITY_NORMAL(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_INTENSITY_FIELDS(PointType) \
-  ADD_NORMAL_FIELDS(PointType) \
-  ADD_CURVATURE_FIELDS(PointType) \
-  ADD_INTENSITY_NORMAL_REPR(PointType, PythonName)
-
-#define BIND_POINT_LABEL_NORMAL(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_LABEL_FIELDS(PointType) \
-  ADD_NORMAL_FIELDS(PointType) \
-  ADD_CURVATURE_FIELDS(PointType) \
-  ADD_LABEL_NORMAL_REPR(PointType, PythonName)
-
-#define BIND_POINT_LAB(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_LAB_FIELDS(PointType) \
-  ADD_LAB_REPR(PointType, PythonName)
-
-#define BIND_POINT_HSV(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_HSV_FIELDS(PointType) \
-  ADD_HSV_REPR(PointType, PythonName)
-
-#define BIND_POINT_XY(PointType, PythonName) \
-  nb::class_<pcl::PointType>(m, PythonName) \
-      .def(nb::init()) \
-      .def(nb::init<float, float>(), nb::arg("x"), nb::arg("y")) \
-      ADD_XY_FIELDS(PointType) \
-      ADD_XY_REPR(PointType, PythonName)
-
-#define BIND_POINT_UV(PointType, PythonName) \
-  nb::class_<pcl::PointType>(m, PythonName) \
-      .def(nb::init()) \
-      .def(nb::init<float, float>(), nb::arg("u"), nb::arg("v")) \
-      ADD_UV_FIELDS(PointType) \
-      ADD_UV_REPR(PointType, PythonName)
-
-#define BIND_POINT_STRENGTH(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_STRENGTH_FIELDS(PointType) \
-  ADD_STRENGTH_REPR(PointType, PythonName)
-
-#define BIND_POINT_VIEWPOINT(PointType, PythonName) \
-  BIND_POINT_BASE(PointType, PythonName) \
-  ADD_XYZ_FIELDS(PointType) \
-  ADD_VIEWPOINT_FIELDS(PointType) \
-  ADD_VIEWPOINT_REPR(PointType, PythonName)
-
-// Standalone point type macros (no XYZ)
-#define BIND_INTENSITY_ONLY(PointType, PythonName) \
-  nb::class_<pcl::PointType>(m, PythonName) \
-      .def(nb::init()) \
-      ADD_INTENSITY_FIELDS(PointType) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(intensity={})").format(p.intensity); \
-      })
-
-#define BIND_LABEL_ONLY(PointType, PythonName) \
-  nb::class_<pcl::PointType>(m, PythonName) \
-      .def(nb::init()) \
-      ADD_LABEL_FIELDS(PointType) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(label={})").format(p.label); \
-      })
-
-#define BIND_RGB_ONLY(PointType, PythonName) \
-  nb::class_<pcl::PointType>(m, PythonName) \
-      .def(nb::init()) \
-      ADD_RGBA_FIELDS(PointType) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(r={}, g={}, b={}, a={})").format(p.r, p.g, p.b, p.a); \
-      })
-
 // Macro for binding point cloud types
 #define BIND_POINTCLOUD(PointType, PythonName) \
   nb::class_<pcl::PointCloud<pcl::PointType>>(m, PythonName) \
@@ -344,154 +71,196 @@ namespace nb = nanobind;
                                       v.begin(), v.end()); \
            }, nb::keep_alive<0, 1>())
 
-// Macros for feature descriptor types
-
-// Macro for FPFH signature (33 features)
-#define BIND_FPFH_SIGNATURE33(PointType, PythonName) \
-  nb::class_<pcl::PointType>(m, PythonName) \
-      .def(nb::init()) \
-      .def_prop_rw("histogram", \
-                    [](const pcl::PointType& p) { \
-                      nb::list result; \
-                      for (int i = 0; i < 33; ++i) result.append(p.histogram[i]); \
-                      return result; \
-                    }, \
-                    [](pcl::PointType& p, const nb::list& hist) { \
-                      for (int i = 0; i < 33 && i < hist.size(); ++i) p.histogram[i] = nb::cast<float>(hist[i]); \
-                    }) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(histogram[0:5]=[{}, {}, {}, {}, {}]...)").format(p.histogram[0], p.histogram[1], p.histogram[2], p.histogram[3], p.histogram[4]); \
-      })
-
-// Macro for PFH signature (125 features)
-#define BIND_PFH_SIGNATURE125(PointType, PythonName) \
-  nb::class_<pcl::PointType>(m, PythonName) \
-      .def(nb::init()) \
-      .def_prop_rw("histogram", \
-                    [](const pcl::PointType& p) { \
-                      nb::list result; \
-                      for (int i = 0; i < 125; ++i) result.append(p.histogram[i]); \
-                      return result; \
-                    }, \
-                    [](pcl::PointType& p, const nb::list& hist) { \
-                      for (int i = 0; i < 125 && i < hist.size(); ++i) p.histogram[i] = nb::cast<float>(hist[i]); \
-                    }) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(histogram[0:5]=[{}, {}, {}, {}, {}]...)").format(p.histogram[0], p.histogram[1], p.histogram[2], p.histogram[3], p.histogram[4]); \
-      })
-
-// Macro for SHOT signature (352 features)
-#define BIND_SHOT_SIGNATURE352(PointType, PythonName) \
-  nb::class_<pcl::PointType>(m, PythonName) \
-      .def(nb::init()) \
-      .def_prop_rw("descriptor", \
-                    [](const pcl::PointType& p) { \
-                      nb::list result; \
-                      for (int i = 0; i < 352; ++i) result.append(p.descriptor[i]); \
-                      return result; \
-                    }, \
-                    [](pcl::PointType& p, const nb::list& desc) { \
-                      for (int i = 0; i < 352 && i < desc.size(); ++i) p.descriptor[i] = nb::cast<float>(desc[i]); \
-                    }) \
-      .def_prop_rw("rf", \
-                    [](const pcl::PointType& p) { \
-                      nb::list result; \
-                      for (int i = 0; i < 9; ++i) result.append(p.rf[i]); \
-                      return result; \
-                    }, \
-                    [](pcl::PointType& p, const nb::list& rf) { \
-                      for (int i = 0; i < 9 && i < rf.size(); ++i) p.rf[i] = nb::cast<float>(rf[i]); \
-                    }) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(descriptor[0:5]=[{}, {}, {}, {}, {}]...)").format(p.descriptor[0], p.descriptor[1], p.descriptor[2], p.descriptor[3], p.descriptor[4]); \
-      })
-
-// Macro for SHOT signature (1344 features)
-#define BIND_SHOT_SIGNATURE1344(PointType, PythonName) \
-  nb::class_<pcl::PointType>(m, PythonName) \
-      .def(nb::init()) \
-      .def_prop_rw("descriptor", \
-                    [](const pcl::PointType& p) { \
-                      nb::list result; \
-                      for (int i = 0; i < 1344; ++i) result.append(p.descriptor[i]); \
-                      return result; \
-                    }, \
-                    [](pcl::PointType& p, const nb::list& desc) { \
-                      for (int i = 0; i < 1344 && i < desc.size(); ++i) p.descriptor[i] = nb::cast<float>(desc[i]); \
-                    }) \
-      .def_prop_rw("rf", \
-                    [](const pcl::PointType& p) { \
-                      nb::list result; \
-                      for (int i = 0; i < 9; ++i) result.append(p.rf[i]); \
-                      return result; \
-                    }, \
-                    [](pcl::PointType& p, const nb::list& rf) { \
-                      for (int i = 0; i < 9 && i < rf.size(); ++i) p.rf[i] = nb::cast<float>(rf[i]); \
-                    }) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(descriptor[0:5]=[{}, {}, {}, {}, {}]...)").format(p.descriptor[0], p.descriptor[1], p.descriptor[2], p.descriptor[3], p.descriptor[4]); \
-      })
-
-// Macro for VFH signature (308 features)
-#define BIND_VFH_SIGNATURE308(PointType, PythonName) \
-  nb::class_<pcl::PointType>(m, PythonName) \
-      .def(nb::init()) \
-      .def_prop_rw("histogram", \
-                    [](const pcl::PointType& p) { \
-                      nb::list result; \
-                      for (int i = 0; i < 308; ++i) result.append(p.histogram[i]); \
-                      return result; \
-                    }, \
-                    [](pcl::PointType& p, const nb::list& hist) { \
-                      for (int i = 0; i < 308 && i < hist.size(); ++i) p.histogram[i] = nb::cast<float>(hist[i]); \
-                    }) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(histogram[0:5]=[{}, {}, {}, {}, {}]...)").format(p.histogram[0], p.histogram[1], p.histogram[2], p.histogram[3], p.histogram[4]); \
-      })
-
-// Macro for ESF signature (640 features)
-#define BIND_ESF_SIGNATURE640(PointType, PythonName) \
-  nb::class_<pcl::PointType>(m, PythonName) \
-      .def(nb::init()) \
-      .def_prop_rw("histogram", \
-                    [](const pcl::PointType& p) { \
-                      nb::list result; \
-                      for (int i = 0; i < 640; ++i) result.append(p.histogram[i]); \
-                      return result; \
-                    }, \
-                    [](pcl::PointType& p, const nb::list& hist) { \
-                      for (int i = 0; i < 640 && i < hist.size(); ++i) p.histogram[i] = nb::cast<float>(hist[i]); \
-                    }) \
-      .def("__repr__", [](const pcl::PointType& p) { \
-        return nb::str(PythonName "(histogram[0:5]=[{}, {}, {}, {}, {}]...)").format(p.histogram[0], p.histogram[1], p.histogram[2], p.histogram[3], p.histogram[4]); \
-      })
-
 NB_MODULE(pcl_common_ext, m)
 {
   // Core point types (known to exist)
-  BIND_POINT_XYZ(PointXYZ, "PointXYZ");
-  BIND_POINT_RGBA(PointXYZRGBA, "PointXYZRGBA");
-  BIND_POINT_RGB(PointXYZRGB, "PointXYZRGB");
-  BIND_POINT_INTENSITY(PointXYZI, "PointXYZI");
-  BIND_POINT_LABEL(PointXYZL, "PointXYZL");
+  BIND_POINT_BASE(PointXYZ, "PointXYZ")
+  ADD_XYZ_FIELDS(PointXYZ)
+      .def("__repr__", [](const pcl::PointXYZ& p) {
+        return nb::str("PointXYZ" "(x={}, y={}, z={})").format(p.x, p.y, p.z);
+      });
+
+  BIND_POINT_BASE(PointXYZRGBA, "PointXYZRGBA")
+  ADD_XYZ_FIELDS(PointXYZRGBA)
+  ADD_RGBA_FIELDS(PointXYZRGBA)
+      .def("__repr__", [](const pcl::PointXYZRGBA& p) {
+        return nb::str("PointXYZRGBA" "(x={}, y={}, z={}, r={}, g={}, b={}, a={})").format(p.x, p.y, p.z, p.r, p.g, p.b, p.a);
+      });
+
+  BIND_POINT_BASE(PointXYZRGB, "PointXYZRGB")
+  ADD_XYZ_FIELDS(PointXYZRGB)
+  ADD_RGB_FIELDS(PointXYZRGB)
+      .def("__repr__", [](const pcl::PointXYZRGB& p) {
+        return nb::str("PointXYZRGB" "(x={}, y={}, z={}, rgb={})").format(p.x, p.y, p.z, p.rgb);
+      });
+
+  BIND_POINT_BASE(PointXYZI, "PointXYZI")
+  ADD_XYZ_FIELDS(PointXYZI)
+  ADD_INTENSITY_FIELDS(PointXYZI)
+      .def("__repr__", [](const pcl::PointXYZI& p) {
+        return nb::str("PointXYZI" "(x={}, y={}, z={}, intensity={})").format(p.x, p.y, p.z, p.intensity);
+      });
+
+  BIND_POINT_BASE(PointXYZL, "PointXYZL")
+  ADD_XYZ_FIELDS(PointXYZL)
+  ADD_LABEL_FIELDS(PointXYZL)
+      .def("__repr__", [](const pcl::PointXYZL& p) {
+        return nb::str("PointXYZL" "(x={}, y={}, z={}, label={})").format(p.x, p.y, p.z, p.label);
+      });
   
   // Normal types
-  BIND_NORMAL_ONLY(Normal, "Normal");
-  BIND_POINT_NORMAL(PointNormal, "PointNormal");
-  BIND_POINT_RGB_NORMAL(PointXYZRGBNormal, "PointXYZRGBNormal");
-  BIND_POINT_INTENSITY_NORMAL(PointXYZINormal, "PointXYZINormal");
-  BIND_POINT_LABEL_NORMAL(PointXYZLNormal, "PointXYZLNormal");
+  BIND_POINT_BASE_NO_XYZ(Normal, "Normal")
+      ADD_NORMAL_FIELDS(Normal)
+      ADD_CURVATURE_FIELDS(Normal)
+      .def("__repr__", [](const pcl::Normal& p) {
+        return nb::str("Normal" "(nx={}, ny={}, nz={}, curvature={})").format(p.normal_x, p.normal_y, p.normal_z, p.curvature);
+      });
+
+  BIND_POINT_BASE(PointNormal, "PointNormal")
+  ADD_XYZ_FIELDS(PointNormal)
+  ADD_NORMAL_FIELDS(PointNormal)
+  ADD_CURVATURE_FIELDS(PointNormal)
+      .def("__repr__", [](const pcl::PointNormal& p) {
+        return nb::str("PointNormal" "(x={}, y={}, z={}, nx={}, ny={}, nz={}, curvature={})").format(p.x, p.y, p.z, p.normal_x, p.normal_y, p.normal_z, p.curvature);
+      });
+
+  BIND_POINT_BASE(PointXYZRGBNormal, "PointXYZRGBNormal")
+  ADD_XYZ_FIELDS(PointXYZRGBNormal)
+  ADD_RGB_FIELDS(PointXYZRGBNormal)
+  ADD_NORMAL_FIELDS(PointXYZRGBNormal)
+  ADD_CURVATURE_FIELDS(PointXYZRGBNormal)
+      .def("__repr__", [](const pcl::PointXYZRGBNormal& p) {
+        return nb::str("PointXYZRGBNormal" "(x={}, y={}, z={}, rgb={}, nx={}, ny={}, nz={}, curvature={})").format(p.x, p.y, p.z, p.rgb, p.normal_x, p.normal_y, p.normal_z, p.curvature);
+      });
+
+  BIND_POINT_BASE(PointXYZINormal, "PointXYZINormal")
+  ADD_XYZ_FIELDS(PointXYZINormal)
+  ADD_INTENSITY_FIELDS(PointXYZINormal)
+  ADD_NORMAL_FIELDS(PointXYZINormal)
+  ADD_CURVATURE_FIELDS(PointXYZINormal)
+      .def("__repr__", [](const pcl::PointXYZINormal& p) {
+        return nb::str("PointXYZINormal" "(x={}, y={}, z={}, intensity={}, nx={}, ny={}, nz={}, curvature={})").format(p.x, p.y, p.z, p.intensity, p.normal_x, p.normal_y, p.normal_z, p.curvature);
+      });
+
+  BIND_POINT_BASE(PointXYZLNormal, "PointXYZLNormal")
+  ADD_XYZ_FIELDS(PointXYZLNormal)
+  ADD_LABEL_FIELDS(PointXYZLNormal)
+  ADD_NORMAL_FIELDS(PointXYZLNormal)
+  ADD_CURVATURE_FIELDS(PointXYZLNormal)
+      .def("__repr__", [](const pcl::PointXYZLNormal& p) {
+        return nb::str("PointXYZLNormal" "(x={}, y={}, z={}, label={}, nx={}, ny={}, nz={}, curvature={})").format(p.x, p.y, p.z, p.label, p.normal_x, p.normal_y, p.normal_z, p.curvature);
+      });
   
   // Other types
-  BIND_POINT_RANGE(PointWithRange, "PointWithRange");
+  BIND_POINT_BASE(PointWithRange, "PointWithRange")
+  ADD_XYZ_FIELDS(PointWithRange)
+      .def_rw("range", &pcl::PointWithRange::range)
+      .def("__repr__", [](const pcl::PointWithRange& p) {
+        return nb::str("PointWithRange" "(x={}, y={}, z={}, range={})").format(p.x, p.y, p.z, p.range);
+      });
 
   // Feature descriptor types
-  BIND_FPFH_SIGNATURE33(FPFHSignature33, "FPFHSignature33");
-  BIND_PFH_SIGNATURE125(PFHSignature125, "PFHSignature125");
-  BIND_SHOT_SIGNATURE352(SHOT352, "SHOT352");
-  BIND_SHOT_SIGNATURE1344(SHOT1344, "SHOT1344");
-  BIND_VFH_SIGNATURE308(VFHSignature308, "VFHSignature308");
-  BIND_ESF_SIGNATURE640(ESFSignature640, "ESFSignature640");
+  BIND_POINT_BASE_NO_XYZ(FPFHSignature33, "FPFHSignature33")
+      .def_prop_rw("histogram",
+                    [](const pcl::FPFHSignature33& p) {
+                      nb::list result;
+                      for (int i = 0; i < 33; ++i) result.append(p.histogram[i]);
+                      return result;
+                    },
+                    [](pcl::FPFHSignature33& p, const nb::list& hist) {
+                      for (int i = 0; i < 33 && i < hist.size(); ++i) p.histogram[i] = nb::cast<float>(hist[i]);
+                    })
+      .def("__repr__", [](const pcl::FPFHSignature33& p) {
+        return nb::str("FPFHSignature33" "(histogram[0:5]=[{}, {}, {}, {}, {}]...)").format(p.histogram[0], p.histogram[1], p.histogram[2], p.histogram[3], p.histogram[4]);
+      });
+
+  BIND_POINT_BASE_NO_XYZ(PFHSignature125, "PFHSignature125")
+      .def_prop_rw("histogram",
+                    [](const pcl::PFHSignature125& p) {
+                      nb::list result;
+                      for (int i = 0; i < 125; ++i) result.append(p.histogram[i]);
+                      return result;
+                    },
+                    [](pcl::PFHSignature125& p, const nb::list& hist) {
+                      for (int i = 0; i < 125 && i < hist.size(); ++i) p.histogram[i] = nb::cast<float>(hist[i]);
+                    })
+      .def("__repr__", [](const pcl::PFHSignature125& p) {
+        return nb::str("PFHSignature125" "(histogram[0:5]=[{}, {}, {}, {}, {}]...)").format(p.histogram[0], p.histogram[1], p.histogram[2], p.histogram[3], p.histogram[4]);
+      });
+
+  BIND_POINT_BASE_NO_XYZ(SHOT352, "SHOT352")
+      .def_prop_rw("descriptor",
+                    [](const pcl::SHOT352& p) {
+                      nb::list result;
+                      for (int i = 0; i < 352; ++i) result.append(p.descriptor[i]);
+                      return result;
+                    },
+                    [](pcl::SHOT352& p, const nb::list& desc) {
+                      for (int i = 0; i < 352 && i < desc.size(); ++i) p.descriptor[i] = nb::cast<float>(desc[i]);
+                    })
+      .def_prop_rw("rf",
+                    [](const pcl::SHOT352& p) {
+                      nb::list result;
+                      for (int i = 0; i < 9; ++i) result.append(p.rf[i]);
+                      return result;
+                    },
+                    [](pcl::SHOT352& p, const nb::list& rf) {
+                      for (int i = 0; i < 9 && i < rf.size(); ++i) p.rf[i] = nb::cast<float>(rf[i]);
+                    })
+      .def("__repr__", [](const pcl::SHOT352& p) {
+        return nb::str("SHOT352" "(descriptor[0:5]=[{}, {}, {}, {}, {}]...)").format(p.descriptor[0], p.descriptor[1], p.descriptor[2], p.descriptor[3], p.descriptor[4]);
+      });
+
+  BIND_POINT_BASE_NO_XYZ(SHOT1344, "SHOT1344")
+      .def_prop_rw("descriptor",
+                    [](const pcl::SHOT1344& p) {
+                      nb::list result;
+                      for (int i = 0; i < 1344; ++i) result.append(p.descriptor[i]);
+                      return result;
+                    },
+                    [](pcl::SHOT1344& p, const nb::list& desc) {
+                      for (int i = 0; i < 1344 && i < desc.size(); ++i) p.descriptor[i] = nb::cast<float>(desc[i]);
+                    })
+      .def_prop_rw("rf",
+                    [](pcl::SHOT1344& p) {
+                      nb::list result;
+                      for (int i = 0; i < 9; ++i) result.append(p.rf[i]);
+                      return result;
+                    },
+                    [](pcl::SHOT1344& p, const nb::list& rf) {
+                      for (int i = 0; i < 9 && i < rf.size(); ++i) p.rf[i] = nb::cast<float>(rf[i]);
+                    })
+      .def("__repr__", [](const pcl::SHOT1344& p) {
+        return nb::str("SHOT1344" "(descriptor[0:5]=[{}, {}, {}, {}, {}]...)").format(p.descriptor[0], p.descriptor[1], p.descriptor[2], p.descriptor[3], p.descriptor[4]);
+      });
+
+  BIND_POINT_BASE_NO_XYZ(VFHSignature308, "VFHSignature308")
+      .def_prop_rw("histogram",
+                    [](const pcl::VFHSignature308& p) {
+                      nb::list result;
+                      for (int i = 0; i < 308; ++i) result.append(p.histogram[i]);
+                      return result;
+                    },
+                    [](pcl::VFHSignature308& p, const nb::list& hist) {
+                      for (int i = 0; i < 308 && i < hist.size(); ++i) p.histogram[i] = nb::cast<float>(hist[i]);
+                    })
+      .def("__repr__", [](const pcl::VFHSignature308& p) {
+        return nb::str("VFHSignature308" "(histogram[0:5]=[{}, {}, {}, {}, {}]...)").format(p.histogram[0], p.histogram[1], p.histogram[2], p.histogram[3], p.histogram[4]);
+      });
+
+  BIND_POINT_BASE_NO_XYZ(ESFSignature640, "ESFSignature640")
+      .def_prop_rw("histogram",
+                    [](const pcl::ESFSignature640& p) {
+                      nb::list result;
+                      for (int i = 0; i < 640; ++i) result.append(p.histogram[i]);
+                      return result;
+                    },
+                    [](pcl::ESFSignature640& p, const nb::list& hist) {
+                      for (int i = 0; i < 640 && i < hist.size(); ++i) p.histogram[i] = nb::cast<float>(hist[i]);
+                    })
+      .def("__repr__", [](const pcl::ESFSignature640& p) {
+        return nb::str("ESFSignature640" "(histogram[0:5]=[{}, {}, {}, {}, {}]...)").format(p.histogram[0], p.histogram[1], p.histogram[2], p.histogram[3], p.histogram[4]);
+      });
 
   // Point cloud types for existing types
   BIND_POINTCLOUD(PointXYZ, "PointcloudXYZ");
