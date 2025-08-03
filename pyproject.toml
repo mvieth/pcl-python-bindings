@@ -8,6 +8,9 @@ version = "0.0.1"
 description = "An example minimal project that compiles bindings using nanobind and scikit-build"
 readme = "README.md"
 requires-python = ">=3.8"
+dependencies = [
+  "numpy",
+]
 authors = [
     { name = "Wenzel Jakob", email = "wenzel.jakob@epfl.ch" },
 ]

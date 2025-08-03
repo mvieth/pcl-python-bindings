@@ -57,25 +57,25 @@ find_package(nanobind CONFIG REQUIRED)
 #  src/nanobind_example_ext.cpp
 #)
 
-nanobind_add_module(pcl_common_ext src/python_common.cpp)
+nanobind_add_module(pcl_common_ext STABLE_ABI src/python_common.cpp)
 target_link_libraries(pcl_common_ext PRIVATE pcl_common)
 
-nanobind_add_module(pcl_io_ext src/python_io.cpp)
+nanobind_add_module(pcl_io_ext STABLE_ABI src/python_io.cpp)
 target_link_libraries(pcl_io_ext PRIVATE pcl_io)
 
-nanobind_add_module(pcl_features_ext src/python_features.cpp)
+nanobind_add_module(pcl_features_ext STABLE_ABI src/python_features.cpp)
 target_link_libraries(pcl_features_ext PRIVATE pcl_features)
 
-nanobind_add_module(pcl_filters_ext src/python_filters.cpp)
+nanobind_add_module(pcl_filters_ext STABLE_ABI src/python_filters.cpp)
 target_link_libraries(pcl_filters_ext PRIVATE pcl_filters)
 
-nanobind_add_module(pcl_registration_ext src/python_registration.cpp)
+nanobind_add_module(pcl_registration_ext STABLE_ABI src/python_registration.cpp)
 target_link_libraries(pcl_registration_ext PRIVATE pcl_registration)
 
-nanobind_add_module(pcl_segmentation_ext src/python_segmentation.cpp)
+nanobind_add_module(pcl_segmentation_ext STABLE_ABI src/python_segmentation.cpp)
 target_link_libraries(pcl_segmentation_ext PRIVATE pcl_segmentation)
 
-nanobind_add_module(pcl_visualization_ext src/python_visualization.cpp)
+nanobind_add_module(pcl_visualization_ext STABLE_ABI src/python_visualization.cpp)
 target_link_libraries(pcl_visualization_ext PRIVATE pcl_visualization)
 
 # Install directive for scikit-build-core
