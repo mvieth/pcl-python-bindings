@@ -41,11 +41,14 @@ jobs:
   build_wheels:
     name: Wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    env: 
+      USERNAME: mvieth
+      FEED_URL: https://nuget.pkg.github.com/mvieth/index.json
+      VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/mvieth/index.json,readwrite"
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-13]
-        #, windows-latest TODO later
+        os: [ubuntu-latest, macos-13, windows-latest]
         #, macos-latest Necessary if we build macos-13?
 
     steps:
@@ -53,23 +56,57 @@ jobs:
       with:
         submodules: true
 
+    - name: Bootstrap vcpkg
+      if: matrix.os == 'windows-latest'
+      env:
+        VCPKG_DEFAULT_TRIPLET: x64-windows
+      run: |
+        cd $VCPKG_INSTALLATION_ROOT
+        git pull > nul
+        ./bootstrap-vcpkg.bat -disableMetrics
+      shell: bash
+
+    - name: 'Setup NuGet Credentials'
+      if: matrix.os == 'windows-latest'
+      shell: pwsh
+      run: >
+        .$(vcpkg fetch nuget) `
+          sources add `
+          -Source "${{ env.FEED_URL }}" `
+          -StorePasswordInClearText `
+          -Name GitHubPackages `
+          -UserName "${{ env.USERNAME }}" `
+          -Password "${{ secrets.GH_PACKAGES_TOKEN }}"
+        .$(vcpkg fetch nuget) `
+          setapikey "${{ secrets.GH_PACKAGES_TOKEN }}" `
+          -Source "${{ env.FEED_URL }}"
+
+
     - uses: pypa/cibuildwheel@v2.23
       env:
+        #All OS
         CIBW_ENABLE: cpython-prerelease
         # Skip pypy (pp) for now, also skip i686 and musllinux for now, they need additional dockerimages with PCL preinstalled
-        CIBW_SKIP: "pp*-macosx_x86_64 pp*-manylinux_* *-manylinux_i686 *-musllinux_*"
+        CIBW_SKIP: "pp* *-manylinux_i686 *-musllinux_*"
+
+        # Windows OS
+        CIBW_ENVIRONMENT_WINDOWS: CMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake
+        CIBW_BEFORE_BUILD_WINDOWS: vcpkg install pcl[vtk]:x64-windows --clean-after-build && pip install delvewheel scikit_build_core
+        CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: delvewheel repair --add-path %VCPKG_INSTALLATION_ROOT%/installed/x64-windows/bin -w {dest_dir} {wheel}
+        CIBW_TEST_COMMAND_WINDOWS: pytest {project}/tests -k "not test_basic_visualization_functionality"
+        CIBW_ARCHS_WINDOWS: auto64
+
+        # Linux OS
+        CIBW_MANYLINUX_X86_64_IMAGE: markusvieth/pcl-manylinux_2_28:x86_64_latest
+        # Add images for i686 and musllinux later?
         # alternatively xvfb to run visualization test?
         CIBW_TEST_COMMAND_LINUX: pytest {project}/tests -k 'not test_basic_visualization_functionality'
         # Some .so files are in these lib64 paths, which auditwheel does not seem to search automatically
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: "LD_LIBRARY_PATH=/usr/local/lib64/:/usr/lib64/ auditwheel repair -w {dest_dir} {wheel}"
-        # Maybe useful later?
-        #CIBW_BEFORE_BUILD_WINDOWS: "pip install delvewheel"
-        #CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair -w {dest_dir} {wheel}"
-        CIBW_ARCHS_WINDOWS: auto ARM64
+
+        #MacOS
         CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="13.0"
         CIBW_BEFORE_ALL_MACOS: brew install pcl
-        CIBW_MANYLINUX_X86_64_IMAGE: markusvieth/pcl-manylinux_2_28:x86_64_latest
-        # Add images for i686 and musllinux later?
 
     - name: Verify clean directory
       run: git diff --exit-code
@@ -79,7 +116,6 @@ jobs:
       with:
         name: cibw-wheels-${{ matrix.os }}
         path: wheelhouse/*.whl
-
 
   upload_all:
     name: Upload if release
