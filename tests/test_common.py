@@ -19,8 +19,6 @@ def test_pointcloud():
 def test_general_cloud():
     cloud = PointCloud(t.PointXYZ)
     assert len(cloud) == 0
-    assert "position" in cloud.keys()
-    assert "normal" not in cloud.keys()
     position = np.array([[1, 2, 3], [4, 5, 6]])
     cloud["position"] = position
     result = cloud["position"]
@@ -28,13 +26,52 @@ def test_general_cloud():
     assert len(cloud) == position.shape[0]
 
     cloud = PointCloud(t.Normal)
-    assert "position" not in cloud.keys()
-    assert "normal" in cloud.keys()
     normal = np.array([[1, 2, 3], [4, 5, 6]])
     cloud["normal"] = normal
     result = cloud["normal"]
     np.testing.assert_allclose(normal, result)
     assert len(cloud) == normal.shape[0]
+
+
+def test_keys():
+    cloud = PointCloud(t.PointXYZ)
+    assert {"position"} == set(cloud.keys())
+
+    cloud = PointCloud(t.PointXYZI)
+    assert {"position", "intensity"} == set(cloud.keys())
+
+    cloud = PointCloud(t.PointXYZL)
+    assert {"position", "label"} == set(cloud.keys())
+
+    cloud = PointCloud(t.PointXYZRGBA)
+    assert {"position", "color"} == set(cloud.keys())
+
+    cloud = PointCloud(t.PointXYZRGB)
+    assert {"position", "color"} == set(cloud.keys())
+
+    cloud = PointCloud(t.PointXYZRGBL)
+    assert {"position", "color", "label"} == set(cloud.keys())
+
+    cloud = PointCloud(t.PointXYZLAB)
+    assert {"position", "Lab"} == set(cloud.keys())
+
+    cloud = PointCloud(t.PointXYZHSV)
+    assert {"position", "hsv"} == set(cloud.keys())
+
+    cloud = PointCloud(t.Normal)
+    assert {"normal", "curvature"} == set(cloud.keys())
+
+    cloud = PointCloud(t.PointNormal)
+    assert {"position", "normal", "curvature"} == set(cloud.keys())
+
+    cloud = PointCloud(t.PointXYZRGBNormal)
+    assert {"position", "color", "normal", "curvature"} == set(cloud.keys())
+
+    cloud = PointCloud(t.PointXYZINormal)
+    assert {"position", "intensity", "normal", "curvature"} == set(cloud.keys())
+
+    cloud = PointCloud(t.PointXYZLNormal)
+    assert {"position", "label", "normal", "curvature"} == set(cloud.keys())
 
 
 def everything_is_point(n_points: int):
@@ -47,15 +84,15 @@ def everything_is_point(n_points: int):
 
 def everything_is_cloud(n_points: int):
     cloud = PointCloud(t.PointXYZ)
-    values = np.hstack((
-        np.zeros((n_points, 2)), np.arange(n_points).reshape(n_points, 1)
-    ))
-    cloud['position'] =  values
+    values = np.hstack(
+        (np.zeros((n_points, 2)), np.arange(n_points).reshape(n_points, 1))
+    )
+    cloud["position"] = values
 
 
 def compare_speed():
     """
-    >> compare_speed()
+    >>> compare_speed()
 
     Run with 1 point
     Point-Based took 0.002 ms
@@ -80,7 +117,7 @@ def compare_speed():
     Cloud-Based took 14.528 ms
     """
     n_rep = 20
-    for power in np.arange(7): 
+    for power in np.arange(7):
         n_points = int(10**power)
         print(f"Run with {n_points} point")
         point_time = 0
