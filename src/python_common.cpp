@@ -32,7 +32,7 @@ template<typename T> requires (!HasPosition<T>)
 NumpyArray2d get_positions(T &cloud) {std::cout << "Key does not exist.\n"; throw 101;};
 template<typename T> requires HasPosition<T>
 NumpyArray2d get_positions(T &cloud){
-  char cols = 3;
+  size_t cols = 3;
   auto rows = cloud->size(); 
 
   float *data = new float[rows * cols];
@@ -66,7 +66,7 @@ template<typename T> requires (!HasNormal<T>)
 NumpyArray2d get_normals(T &cloud) {std::cout << "Key does not exist.\n"; throw 101;};
 template<typename T> requires HasNormal<T>
 NumpyArray2d get_normals(T &cloud){
-  char cols = 3;
+  size_t cols = 3;
   auto rows = cloud->size(); 
 
   float *data = new float[rows * cols];
@@ -86,11 +86,20 @@ NumpyArray2d get_normals(T &cloud){
 NB_MODULE(pcl_common_ext, m)
 {
   nb::enum_<PointType>(m, "PointType")
-    .value("PointXYZ", PointXYZ)
-    .value("PointXYZRGBA",PointXYZRGBA)
-    .value("PointNormal",PointNormal)
-    .value("Normal", Normal)
-    .export_values();
+  .value("PointXYZ", PointXYZ)
+  .value("PointXYZI", PointXYZI)
+  .value("PointXYZL", PointXYZL)
+  .value("PointXYZRGBA", PointXYZRGBA)
+  .value("PointXYZRGB", PointXYZRGB)
+  .value("PointXYZRGBL", PointXYZRGBL)
+  .value("PointXYZLAB", PointXYZLAB)
+  .value("PointXYZHSV", PointXYZHSV)
+  .value("Normal", Normal)
+  .value("PointNormal", PointNormal)
+  .value("PointXYZRGBNormal", PointXYZRGBNormal)
+  .value("PointXYZINormal", PointXYZINormal)
+  .value("PointXYZLNormal", PointXYZLNormal)
+  .export_values();
 
   nb::class_<PointCloud>(m, "PointCloud")
     .def(nb::init<PointType>())
@@ -100,6 +109,7 @@ NB_MODULE(pcl_common_ext, m)
         cloud.type(), cloud.size(), keys::get_keys(cloud));
     })
     .def("keys", &keys::get_keys)
+    .def_prop_ro("type", [](PointCloud &cloud) { return cloud.type();})
     .def("__len__", &PointCloud::size)
     .def("__setitem__", [](PointCloud& cloud, std::string key, InputArray2d array){
       return std::visit([key, array](auto&& arg){ 
