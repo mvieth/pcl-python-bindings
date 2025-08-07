@@ -88,7 +88,7 @@ jobs:
         CIBW_ENABLE: cpython-prerelease
         # Skip pypy (pp) for now, also skip i686 and musllinux for now, they need additional dockerimages with PCL preinstalled
         # Skip free-threading ie. cp313t, cp314t
-        CIBW_SKIP: "pp* cp*t* *-manylinux_i686 *-musllinux_*"
+        CIBW_SKIP: "cp*t* *-manylinux_i686 *-musllinux_*"
 
         # Windows OS
         CIBW_ENVIRONMENT_WINDOWS: CMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake
