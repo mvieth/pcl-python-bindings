@@ -41,6 +41,27 @@ nb::class_<T> &add_xyz_fields(nb::class_<T> &cls) {
   return cls.def_rw("x", &T::x).def_rw("y", &T::y).def_rw("z", &T::z);
 }
 
+// Additional field helpers
+template <typename T>
+nb::class_<T> &add_intensity_field(nb::class_<T> &cls) {
+  return cls.def_rw("intensity", &T::intensity);
+}
+
+template <typename T>
+nb::class_<T> &add_label_field(nb::class_<T> &cls) {
+  return cls.def_rw("label", &T::label);
+}
+
+template <typename T>
+nb::class_<T> &add_lab_fields(nb::class_<T> &cls) {
+  return cls.def_rw("L", &T::L).def_rw("a", &T::a).def_rw("b", &T::b);
+}
+
+template <typename T>
+nb::class_<T> &add_hsv_fields(nb::class_<T> &cls) {
+  return cls.def_rw("h", &T::h).def_rw("s", &T::s).def_rw("v", &T::v);
+}
+
 template <typename T>
 nb::class_<T> &add_rgba_fields(nb::class_<T> &cls) {
   return cls.def_rw("r", &T::r).def_rw("g", &T::g).def_rw("b", &T::b).def_rw("a", &T::a);
@@ -176,6 +197,58 @@ inline nb::class_<pcl::PointXYZRGBNormal> &add_rgb_channel_properties(nb::class_
   return cls;
 }
 
+// Support packed rgb accessors also for PointXYZRGBL
+inline nb::class_<pcl::PointXYZRGBL> &add_rgb_channel_properties(nb::class_<pcl::PointXYZRGBL> &cls) {
+  cls.def_prop_rw(
+    "r",
+    [](const pcl::PointXYZRGBL &p) {
+      std::uint32_t u = float_to_u32(p.rgb);
+      return static_cast<int>((u >> 16) & 0xFFu);
+    },
+    [](pcl::PointXYZRGBL &p, int r) {
+      std::uint32_t u = float_to_u32(p.rgb);
+      u = (u & 0xFF00FFFFu) | (clamp_channel_int(r) << 16);
+      p.rgb = u32_to_float(u);
+    },
+    "Red channel (0..255) derived from packed rgb");
+
+  cls.def_prop_rw(
+    "g",
+    [](const pcl::PointXYZRGBL &p) {
+      std::uint32_t u = float_to_u32(p.rgb);
+      return static_cast<int>((u >> 8) & 0xFFu);
+    },
+    [](pcl::PointXYZRGBL &p, int g) {
+      std::uint32_t u = float_to_u32(p.rgb);
+      u = (u & 0xFFFF00FFu) | (clamp_channel_int(g) << 8);
+      p.rgb = u32_to_float(u);
+    },
+    "Green channel (0..255) derived from packed rgb");
+
+  cls.def_prop_rw(
+    "b",
+    [](const pcl::PointXYZRGBL &p) {
+      std::uint32_t u = float_to_u32(p.rgb);
+      return static_cast<int>(u & 0xFFu);
+    },
+    [](pcl::PointXYZRGBL &p, int b) {
+      std::uint32_t u = float_to_u32(p.rgb);
+      u = (u & 0xFFFFFF00u) | clamp_channel_int(b);
+      p.rgb = u32_to_float(u);
+    },
+    "Blue channel (0..255) derived from packed rgb");
+
+  cls.def_prop_rw(
+    "rgb_int",
+    [](const pcl::PointXYZRGBL &p) { return static_cast<std::uint32_t>(float_to_u32(p.rgb) & 0x00FFFFFFu); },
+    [](pcl::PointXYZRGBL &p, std::uint32_t packed) {
+      packed &= 0x00FFFFFFu;
+      p.rgb = u32_to_float(packed);
+    },
+    "Packed RGB as 0xRRGGBB integer");
+  return cls;
+}
+
 // PointCloud binder with Pythonic conveniences
 template <typename PointT>
 void bind_pointcloud(nb::module_ &m, const char *python_name) {
@@ -221,11 +294,43 @@ NB_MODULE(pcl_common_ext, m) {
       });
   }
 
+  // PointXYZI
+  {
+    auto cls = bind_point_base<pcl::PointXYZI>(m, "PointXYZI", HasXYZ{});
+    add_xyz_fields(cls);
+    add_intensity_field(cls)
+      .def("__init__", [](pcl::PointXYZI *self, float x, float y, float z, float intensity) {
+            new (self) pcl::PointXYZI(); self->x=x; self->y=y; self->z=z; self->intensity=intensity; },
+            nb::arg("x"), nb::arg("y"), nb::arg("z"), nb::arg("intensity"))
+      .def("__repr__", [](const pcl::PointXYZI &p) { return nb::str("PointXYZI(x={}, y={}, z={}, intensity={})").format(p.x,p.y,p.z,p.intensity); });
+  }
+
+  // PointXYZL
+  {
+    auto cls = bind_point_base<pcl::PointXYZL>(m, "PointXYZL", HasXYZ{});
+    add_xyz_fields(cls);
+    add_label_field(cls)
+      .def("__init__", [](pcl::PointXYZL *self, float x, float y, float z, std::uint32_t label) {
+            new (self) pcl::PointXYZL(); self->x=x; self->y=y; self->z=z; self->label=label; },
+            nb::arg("x"), nb::arg("y"), nb::arg("z"), nb::arg("label"))
+      .def("__repr__", [](const pcl::PointXYZL &p) { return nb::str("PointXYZL(x={}, y={}, z={}, label={})").format(p.x,p.y,p.z,p.label); });
+  }
+
   // PointXYZRGBA
   {
     auto cls = bind_point_base<pcl::PointXYZRGBA>(m, "PointXYZRGBA", HasXYZ{});
     add_xyz_fields(cls);
     add_rgba_fields(cls)
+      // Convenience init: (x, y, z, r, g, b, a)
+      .def("__init__", [](pcl::PointXYZRGBA *self, float x, float y, float z, int r, int g, int b, int a) {
+             new (self) pcl::PointXYZRGBA();
+             self->x = x; self->y = y; self->z = z;
+             self->r = static_cast<std::uint8_t>(clamp_channel_int(r));
+             self->g = static_cast<std::uint8_t>(clamp_channel_int(g));
+             self->b = static_cast<std::uint8_t>(clamp_channel_int(b));
+             self->a = static_cast<std::uint8_t>(clamp_channel_int(a));
+           },
+           nb::arg("x"), nb::arg("y"), nb::arg("z"), nb::arg("r"), nb::arg("g"), nb::arg("b"), nb::arg("a"))
       .def("__repr__", [](const pcl::PointXYZRGBA &p) {
         return nb::str("PointXYZRGBA(x={}, y={}, z={}, r={}, g={}, b={}, a={})").format(p.x, p.y, p.z, p.r, p.g, p.b, p.a);
       });
@@ -236,10 +341,63 @@ NB_MODULE(pcl_common_ext, m) {
     auto cls = bind_point_base<pcl::PointXYZRGB>(m, "PointXYZRGB", HasXYZ{});
     add_xyz_fields(cls);
   add_rgb_field(cls);
+  // Convenience init: (x, y, z, r, g, b)
+  cls.def("__init__", [](pcl::PointXYZRGB *self, float x, float y, float z, int r, int g, int b) {
+            new (self) pcl::PointXYZRGB();
+            self->x = x; self->y = y; self->z = z;
+            std::uint32_t u = (clamp_channel_int(r) << 16) | (clamp_channel_int(g) << 8) | clamp_channel_int(b);
+            self->rgb = u32_to_float(u);
+          },
+          nb::arg("x"), nb::arg("y"), nb::arg("z"), nb::arg("r"), nb::arg("g"), nb::arg("b"));
   add_rgb_channel_properties(cls)
       .def("__repr__", [](const pcl::PointXYZRGB &p) {
         return nb::str("PointXYZRGB(x={}, y={}, z={}, rgb={})").format(p.x, p.y, p.z, p.rgb);
       });
+  }
+
+  // PointXYZRGBL
+  {
+    auto cls = bind_point_base<pcl::PointXYZRGBL>(m, "PointXYZRGBL", HasXYZ{});
+    add_xyz_fields(cls);
+    add_rgb_field(cls);
+    add_label_field(cls);
+    cls.def("__init__", [](pcl::PointXYZRGBL *self, float x, float y, float z, int r, int g, int b, std::uint32_t label) {
+            new (self) pcl::PointXYZRGBL(); self->x=x; self->y=y; self->z=z; self->label=label; std::uint32_t u=(clamp_channel_int(r)<<16)|(clamp_channel_int(g)<<8)|clamp_channel_int(b); self->rgb=u32_to_float(u); },
+            nb::arg("x"), nb::arg("y"), nb::arg("z"), nb::arg("r"), nb::arg("g"), nb::arg("b"), nb::arg("label"));
+    add_rgb_channel_properties(cls)
+      .def("__repr__", [](const pcl::PointXYZRGBL &p) { std::uint32_t u=float_to_u32(p.rgb)&0x00FFFFFFu; return nb::str("PointXYZRGBL(x={}, y={}, z={}, rgb=0x{:06X}, label={})").format(p.x,p.y,p.z,u,p.label); });
+  }
+
+  // PointXYZLAB (custom binding without 3-float ctor)
+  {
+    auto cls = nb::class_<pcl::PointXYZLAB>(m, "PointXYZLAB").def(nb::init<>());
+    add_xyz_fields(cls);
+    add_lab_fields(cls)
+      .def("__init__", [](pcl::PointXYZLAB *self, float x,float y,float z,float L,float a,float b){ new (self) pcl::PointXYZLAB(); self->x=x; self->y=y; self->z=z; self->L=L; self->a=a; self->b=b; },
+            nb::arg("x"),nb::arg("y"),nb::arg("z"),nb::arg("L"),nb::arg("a"),nb::arg("b"))
+      .def("__repr__", [](const pcl::PointXYZLAB &p){ return nb::str("PointXYZLAB(x={}, y={}, z={}, L={}, a={}, b={})").format(p.x,p.y,p.z,p.L,p.a,p.b); });
+  }
+
+  // PointXYZHSV (custom binding without 3-float ctor)
+  {
+    auto cls = nb::class_<pcl::PointXYZHSV>(m, "PointXYZHSV").def(nb::init<>());
+    add_xyz_fields(cls);
+    add_hsv_fields(cls)
+      .def("__init__", [](pcl::PointXYZHSV *self, float x,float y,float z,float h,float s,float v){ new (self) pcl::PointXYZHSV(); self->x=x; self->y=y; self->z=z; self->h=h; self->s=s; self->v=v; },
+            nb::arg("x"),nb::arg("y"),nb::arg("z"),nb::arg("h"),nb::arg("s"),nb::arg("v"))
+      .def("__repr__", [](const pcl::PointXYZHSV &p){ return nb::str("PointXYZHSV(x={}, y={}, z={}, h={}, s={}, v={})").format(p.x,p.y,p.z,p.h,p.s,p.v); });
+  }
+
+  // Normal (standalone normal + curvature)
+  {
+    auto cls = bind_point_base<pcl::Normal>(m, "Normal", NoXYZ{});
+    cls.def_rw("normal_x", &pcl::Normal::normal_x)
+       .def_rw("normal_y", &pcl::Normal::normal_y)
+       .def_rw("normal_z", &pcl::Normal::normal_z)
+       .def_rw("curvature", &pcl::Normal::curvature)
+       .def("__init__", [](pcl::Normal *self, float nx,float ny,float nz,float c){ new (self) pcl::Normal(); self->normal_x=nx; self->normal_y=ny; self->normal_z=nz; self->curvature=c; },
+            nb::arg("nx"),nb::arg("ny"),nb::arg("nz"),nb::arg("curvature") )
+       .def("__repr__", [](const pcl::Normal &n){ return nb::str("Normal(nx={}, ny={}, nz={}, curvature={})").format(n.normal_x,n.normal_y,n.normal_z,n.curvature); });
   }
 
   // PointNormal (named PointXYZNormal for back-compat in this module)
@@ -247,9 +405,62 @@ NB_MODULE(pcl_common_ext, m) {
     auto cls = bind_point_base<pcl::PointNormal>(m, "PointXYZNormal", HasXYZ{});
     add_xyz_fields(cls);
     add_normal_fields(cls)
+      // Convenience init: (x, y, z, nx, ny, nz)
+      .def("__init__", [](pcl::PointNormal *self, float x, float y, float z, float nx, float ny, float nz) {
+             new (self) pcl::PointNormal();
+             self->x = x; self->y = y; self->z = z;
+             self->normal_x = nx; self->normal_y = ny; self->normal_z = nz;
+           },
+           nb::arg("x"), nb::arg("y"), nb::arg("z"), nb::arg("nx"), nb::arg("ny"), nb::arg("nz"))
       .def("__repr__", [](const pcl::PointNormal &p) {
         return nb::str("PointXYZNormal(x={}, y={}, z={}, nx={}, ny={}, nz={})").format(p.x, p.y, p.z, p.normal_x, p.normal_y, p.normal_z);
       });
+  }
+
+  // PointXYZRGBNormal (combined color + normals)
+  {
+    auto cls = bind_point_base<pcl::PointXYZRGBNormal>(m, "PointXYZRGBNormal", HasXYZ{});
+    add_xyz_fields(cls);
+    add_rgb_field(cls);
+    add_normal_fields(cls);
+    // Convenience init: (x,y,z,r,g,b,nx,ny,nz)
+    cls.def("__init__", [](pcl::PointXYZRGBNormal *self, float x, float y, float z,
+                             int r, int g, int b, float nx, float ny, float nz) {
+            new (self) pcl::PointXYZRGBNormal();
+            self->x = x; self->y = y; self->z = z;
+            std::uint32_t u = (clamp_channel_int(r) << 16) | (clamp_channel_int(g) << 8) | clamp_channel_int(b);
+            self->rgb = u32_to_float(u);
+            self->normal_x = nx; self->normal_y = ny; self->normal_z = nz;
+          },
+          nb::arg("x"), nb::arg("y"), nb::arg("z"), nb::arg("r"), nb::arg("g"), nb::arg("b"), nb::arg("nx"), nb::arg("ny"), nb::arg("nz"));
+    add_rgb_channel_properties(cls)
+      .def("__repr__", [](const pcl::PointXYZRGBNormal &p) {
+        std::uint32_t u = float_to_u32(p.rgb) & 0x00FFFFFFu;
+        return nb::str("PointXYZRGBNormal(x={}, y={}, z={}, rgb=0x{:06X}, nx={}, ny={}, nz={})")
+            .format(p.x, p.y, p.z, u, p.normal_x, p.normal_y, p.normal_z);
+      });
+  }
+
+  // PointXYZINormal
+  {
+    auto cls = bind_point_base<pcl::PointXYZINormal>(m, "PointXYZINormal", HasXYZ{});
+    add_xyz_fields(cls);
+    add_intensity_field(cls);
+    add_normal_fields(cls)
+      .def("__init__", [](pcl::PointXYZINormal *self, float x,float y,float z,float intensity,float nx,float ny,float nz){ new (self) pcl::PointXYZINormal(); self->x=x; self->y=y; self->z=z; self->intensity=intensity; self->normal_x=nx; self->normal_y=ny; self->normal_z=nz; },
+            nb::arg("x"),nb::arg("y"),nb::arg("z"),nb::arg("intensity"),nb::arg("nx"),nb::arg("ny"),nb::arg("nz"))
+      .def("__repr__", [](const pcl::PointXYZINormal &p){ return nb::str("PointXYZINormal(x={}, y={}, z={}, intensity={}, nx={}, ny={}, nz={})").format(p.x,p.y,p.z,p.intensity,p.normal_x,p.normal_y,p.normal_z); });
+  }
+
+  // PointXYZLNormal
+  {
+    auto cls = bind_point_base<pcl::PointXYZLNormal>(m, "PointXYZLNormal", HasXYZ{});
+    add_xyz_fields(cls);
+    add_label_field(cls);
+    add_normal_fields(cls)
+      .def("__init__", [](pcl::PointXYZLNormal *self, float x,float y,float z,std::uint32_t label,float nx,float ny,float nz){ new (self) pcl::PointXYZLNormal(); self->x=x; self->y=y; self->z=z; self->label=label; self->normal_x=nx; self->normal_y=ny; self->normal_z=nz; },
+            nb::arg("x"),nb::arg("y"),nb::arg("z"),nb::arg("label"),nb::arg("nx"),nb::arg("ny"),nb::arg("nz"))
+      .def("__repr__", [](const pcl::PointXYZLNormal &p){ return nb::str("PointXYZLNormal(x={}, y={}, z={}, label={}, nx={}, ny={}, nz={})").format(p.x,p.y,p.z,p.label,p.normal_x,p.normal_y,p.normal_z); });
   }
 
   // PointCloud bindings
@@ -257,4 +468,12 @@ NB_MODULE(pcl_common_ext, m) {
   bind_pointcloud<pcl::PointXYZRGBA>(m, "PointcloudXYZRGBA");
   bind_pointcloud<pcl::PointXYZRGB>(m, "PointcloudXYZRGB");
   bind_pointcloud<pcl::PointNormal>(m, "PointcloudXYZNormal");
+  bind_pointcloud<pcl::PointXYZRGBNormal>(m, "PointcloudXYZRGBNormal");
+  bind_pointcloud<pcl::PointXYZI>(m, "PointcloudXYZI");
+  bind_pointcloud<pcl::PointXYZL>(m, "PointcloudXYZL");
+  bind_pointcloud<pcl::PointXYZRGBL>(m, "PointcloudXYZRGBL");
+  bind_pointcloud<pcl::PointXYZLAB>(m, "PointcloudXYZLAB");
+  bind_pointcloud<pcl::PointXYZHSV>(m, "PointcloudXYZHSV");
+  bind_pointcloud<pcl::PointXYZINormal>(m, "PointcloudXYZINormal");
+  bind_pointcloud<pcl::PointXYZLNormal>(m, "PointcloudXYZLNormal");
 }
