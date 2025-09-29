@@ -82,7 +82,7 @@ jobs:
           -Source "${{ env.FEED_URL }}"
 
 
-    - uses: pypa/cibuildwheel@v3.1.4
+    - uses: pypa/cibuildwheel@v3.2.0
       env:
         #All OS
         CIBW_ENABLE: cpython-prerelease
