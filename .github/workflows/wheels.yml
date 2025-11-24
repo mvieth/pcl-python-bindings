@@ -22,7 +22,7 @@ jobs:
     name: Build SDist
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         submodules: true
 
@@ -52,7 +52,7 @@ jobs:
         #, macos-latest Necessary if we build macos-13?
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         submodules: true
 
@@ -82,7 +82,7 @@ jobs:
           -Source "${{ env.FEED_URL }}"
 
 
-    - uses: pypa/cibuildwheel@v3.2.1
+    - uses: pypa/cibuildwheel@v3.3.0
       env:
         #All OS
         CIBW_ENABLE: cpython-prerelease
