@@ -8,8 +8,21 @@
 
 namespace nb = nanobind;
 
-NB_MODULE(pcl_filters_ext, m)
-{
+template <typename PointT>
+void bind_passthrough(nb::module_ &m, const char *py_name) {
+  using PT = pcl::PassThrough<PointT>;
+  using FI = pcl::FilterIndices<PointT>;
+  using FBase = pcl::Filter<PointT>;
+  nb::class_<PT>(m, py_name)
+    .def(nb::init<>())
+    .def("setInputCloud", &PT::setInputCloud, nb::arg("cloud"))
+    .def("setFilterLimits", &PT::setFilterLimits, nb::arg("limit_min"), nb::arg("limit_max"))
+    .def("setFilterFieldName", &PT::setFilterFieldName, nb::arg("field_name"))
+    .def("setNegative", &FI::setNegative, nb::arg("negative"))
+    .def("filter", nb::overload_cast<pcl::PointCloud<PointT>&>(&FBase::filter), nb::arg("output"));
+}
+
+NB_MODULE(pcl_filters_ext, m) {
 #if 0 // abstract class
   nb::class_<pcl::Filter<pcl::PointXYZ>(m, "FilterXYZ")
       .def(nb::init<>())
@@ -22,25 +35,9 @@ NB_MODULE(pcl_filters_ext, m)
       .def("setNegative", &pcl::FilterIndices<pcl::PointXYZ>::setNegative)
       ;
 #endif
-  nb::class_<pcl::PassThrough<pcl::PointXYZ>>(m, "PassThroughXYZ", "PassThrough passes points in a cloud based on constraints for one particular field of the point type. Iterates through the entire input once, automatically filtering non-finite points and the points outside the interval specified by setFilterLimits(), which applies only to the field specified by setFilterFieldName().")
-      .def(nb::init<>())
-      .def("setInputCloud", &pcl::PassThrough<pcl::PointXYZ>::setInputCloud, nb::arg("cloud"), "Provide the input dataset.")
-      .def("setFilterLimits", &pcl::PassThrough<pcl::PointXYZ>::setFilterLimits, nb::arg("limit_min"), nb::arg("limit_max"), "Set the numerical limits for the field for filtering data. In conjunction with setFilterFieldName(), points having values outside this interval for this field will be discarded.")
-      .def("setFilterFieldName", &pcl::PassThrough<pcl::PointXYZ>::setFilterFieldName, nb::arg("field_name"), "Provide the name of the field to be used for filtering data. In conjunction with setFilterLimits(), points having values outside this interval for this field will be discarded.")
-      .def("setNegative", &pcl::FilterIndices<pcl::PointXYZ>::setNegative, nb::arg("negative"), "Set whether the regular conditions for points filtering should apply, or the inverted conditions.")
-      .def("filter", nb::overload_cast<pcl::PointCloud<pcl::PointXYZ>&>(&pcl::Filter<pcl::PointXYZ>::filter), nb::arg("output"), "Calls the filtering method and returns the filtered dataset in output.") // TODO alternatively could return output, not as parameter?
-      ;
-
-  nb::class_<pcl::PassThrough<pcl::PointXYZRGBA>>(m, "PassThroughXYZRGBA")
-      .def(nb::init<>())
-      .def("setInputCloud", &pcl::PassThrough<pcl::PointXYZRGBA>::setInputCloud)
-      .def("setFilterLimits", &pcl::PassThrough<pcl::PointXYZRGBA>::setFilterLimits)
-      .def("setFilterFieldName",
-           &pcl::PassThrough<pcl::PointXYZRGBA>::setFilterFieldName)
-      .def("setNegative",
-           &pcl::FilterIndices<pcl::PointXYZRGBA>::setNegative)
-      .def("filter",
-           nb::overload_cast<pcl::PointCloud<pcl::PointXYZRGBA>&>(
-               &pcl::Filter<pcl::PointXYZRGBA>::filter))
-      ;
+  bind_passthrough<pcl::PointXYZ>(m, "PassThroughXYZ");
+  bind_passthrough<pcl::PointXYZRGBA>(m, "PassThroughXYZRGBA");
+  bind_passthrough<pcl::PointXYZRGB>(m, "PassThroughXYZRGB");
+  bind_passthrough<pcl::PointNormal>(m, "PassThroughXYZNormal");
+  bind_passthrough<pcl::PointXYZRGBNormal>(m, "PassThroughXYZRGBNormal");
 }
